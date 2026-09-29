@@ -112,7 +112,7 @@ const PORT = Number(process.env.PORT) || 3000;
     if (seeded) console.log('Database created and seeded with starter data.');
   } catch (err) {
     console.error('Database setup failed:', err.message);
-    process.exit(1);
+    
   }
   app.listen(PORT, () => console.log(`${site.name} is live at ${site.url} (port ${PORT})`));
 })();
