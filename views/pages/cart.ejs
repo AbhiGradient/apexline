@@ -1,0 +1,95 @@
+<%- include('../partials/head') %>
+<div class="container section">
+  <h1>Shopping Cart</h1>
+
+  <% if (!items.length) { %>
+    <div class="empty-state">
+      <h2>Your cart is empty</h2>
+      <p class="muted">Add a few parts and they will show up here.</p>
+      <div class="row" style="justify-content:center">
+        <a class="btn btn-primary" href="/shop">Browse All Parts</a>
+        <a class="btn btn-dark" href="/deals">See Deals</a>
+      </div>
+    </div>
+  <% } else { %>
+    <div class="cart-layout">
+      <div>
+        <% items.forEach((i) => { %>
+          <article class="cart-item">
+            <a href="/product/<%= i.slug %>"><img src="<%= h.imageUrl(i.image) %>" alt="<%= i.name %>" width="110" height="110" loading="lazy"></a>
+            <div>
+              <h3 class="cart-title"><a href="/product/<%= i.slug %>"><%= i.name %></a></h3>
+              <% if (i.brand_name) { %><p class="product-brand"><%= i.brand_name %></p><% } %>
+              <p class="<%= i.inStock ? 'text-ok' : 'text-bad' %>" style="margin:0 0 4px"><%= i.inStock ? 'In stock' : 'Out of stock. Remove to continue.' %></p>
+              <p class="muted" style="margin:0"><%= h.money(i.price) %> each</p>
+              <div class="row">
+                <% if (i.inStock) { %>
+                  <form class="inline-form" method="post" action="/cart/update">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                    <input type="hidden" name="product_id" value="<%= i.id %>">
+                    <label class="sr-only" for="qty-<%= i.id %>">Quantity</label>
+                    <select id="qty-<%= i.id %>" name="quantity" class="input" style="width:auto" data-autosubmit>
+                      <% for (let n = 1; n <= Math.min(i.stock, 10); n++) { %><option value="<%= n %>" <%= n === i.quantity ? 'selected' : '' %>>Qty: <%= n %></option><% } %>
+                    </select>
+                    <noscript><button class="btn btn-ghost btn-sm" type="submit">Update</button></noscript>
+                  </form>
+                <% } %>
+                <form class="inline-form" method="post" action="/cart/remove">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                  <input type="hidden" name="product_id" value="<%= i.id %>">
+                  <button class="link-btn" type="submit">Delete</button>
+                </form>
+                <form class="inline-form" method="post" action="/cart/save-for-later">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                  <input type="hidden" name="product_id" value="<%= i.id %>">
+                  <button class="link-btn" type="submit">Save for later</button>
+                </form>
+              </div>
+            </div>
+            <p class="price"><%= h.money(i.lineTotal) %></p>
+          </article>
+        <% }) %>
+      </div>
+
+      <aside class="summary" aria-label="Order summary">
+        <% if (t.freeShipGap > 0) { %>
+          <p style="margin:0">Add <strong><%= h.money(t.freeShipGap) %></strong> more for free delivery.</p>
+          <div class="progress" role="presentation"><span style="width:<%= Math.min(100, Math.round(((site.shipping.freeAbove - t.freeShipGap) / site.shipping.freeAbove) * 100)) %>%"></span></div>
+        <% } else { %>
+          <p class="text-ok">Your order qualifies for free delivery.</p>
+        <% } %>
+
+        <% if (coupon && coupon.ok) { %>
+          <p class="text-ok" style="margin:0 0 6px"><%= coupon.message %></p>
+          <form method="post" action="/cart/coupon/remove" style="margin-bottom:16px">
+            <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+            <button class="link-btn" type="submit">Remove coupon</button>
+          </form>
+        <% } else { %>
+          <% if (coupon && !coupon.ok) { %><p class="text-bad" style="margin:0 0 6px"><%= coupon.message %></p><% } %>
+          <form class="coupon-form" method="post" action="/cart/coupon">
+            <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+            <label class="sr-only" for="coupon">Coupon code</label>
+            <input id="coupon" type="text" name="code" placeholder="Coupon code" maxlength="30">
+            <button class="btn btn-dark btn-sm" type="submit">Apply</button>
+          </form>
+        <% } %>
+
+        <dl>
+          <div><dt>Subtotal (<%= t.count %> item<%= t.count === 1 ? '' : 's' %>)</dt><dd><%= h.money(t.subtotal) %></dd></div>
+          <% if (t.discount > 0) { %><div><dt>Discount</dt><dd>&minus;<%= h.money(t.discount) %></dd></div><% } %>
+          <div><dt>Shipping</dt><dd><%= t.shipping ? h.money(t.shipping) : 'Free' %></dd></div>
+          <div><dt>GST included</dt><dd><%= h.money(t.tax) %></dd></div>
+          <div class="total"><dt>Total</dt><dd><%= h.money(t.total) %></dd></div>
+        </dl>
+
+        <% if (items.some((i) => !i.inStock)) { %>
+          <p class="text-bad">Remove out-of-stock items to continue.</p>
+        <% } else { %>
+          <a class="btn btn-primary btn-block" href="/checkout"><%= user ? 'Proceed to Checkout' : 'Sign in to Checkout' %></a>
+        <% } %>
+      </aside>
+    </div>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

@@ -1,0 +1,17 @@
+<% if (pages > 1) { %>
+  <nav class="pagination" aria-label="Pagination">
+    <% if (page > 1) { %><a href="<%= link({ page: page - 1 > 1 ? page - 1 : null }) %>" rel="prev">Previous</a><% } %>
+    <% for (let i = 1; i <= pages; i++) { %>
+      <% if (i === 1 || i === pages || Math.abs(i - page) <= 2) { %>
+        <% if (i === page) { %>
+          <span class="is-current" aria-current="page"><%= i %></span>
+        <% } else { %>
+          <a href="<%= link({ page: i > 1 ? i : null }) %>"><%= i %></a>
+        <% } %>
+      <% } else if (Math.abs(i - page) === 3) { %>
+        <span>&hellip;</span>
+      <% } %>
+    <% } %>
+    <% if (page < pages) { %><a href="<%= link({ page: page + 1 }) %>" rel="next">Next</a><% } %>
+  </nav>
+<% } %>

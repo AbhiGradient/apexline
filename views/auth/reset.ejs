@@ -1,0 +1,28 @@
+<%- include('../partials/head') %>
+<section class="auth-wrap">
+  <div class="auth-card">
+    <h1>Reset password</h1>
+    <% if (!valid) { %>
+      <div class="form-errors" role="alert">This reset link is invalid or has expired.</div>
+      <a class="btn btn-primary btn-block" href="/forgot-password">Request a new link</a>
+    <% } else { %>
+      <% if (errors.length) { %>
+        <ul class="form-errors" role="alert"><% errors.forEach((e) => { %><li><%= e %></li><% }) %></ul>
+      <% } %>
+      <form method="post" action="/reset-password/<%= token %>">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <div class="field">
+          <label for="password">New password</label>
+          <input id="password" type="password" name="password" required minlength="8" autocomplete="new-password" autofocus>
+          <p class="field-hint">At least 8 characters with a letter and a number.</p>
+        </div>
+        <div class="field">
+          <label for="confirm">Confirm new password</label>
+          <input id="confirm" type="password" name="confirm" required minlength="8" autocomplete="new-password">
+        </div>
+        <button class="btn btn-primary btn-block" type="submit">Update password</button>
+      </form>
+    <% } %>
+  </div>
+</section>
+<%- include('../partials/footer') %>

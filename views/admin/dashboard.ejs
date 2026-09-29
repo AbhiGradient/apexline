@@ -1,0 +1,62 @@
+<%- include('../partials/head') %>
+<div class="container section">
+  <%- include('../partials/panel-nav') %>
+  <div class="panel-head"><h1>Admin dashboard</h1><a class="btn btn-primary" href="/admin/products/new">+ Add Product</a></div>
+
+  <div class="stats">
+    <div class="stat"><strong><%= h.money(o.revenue) %></strong><span>Revenue (excl. cancelled)</span></div>
+    <div class="stat"><strong><%= o.orders %></strong><span>Total orders</span></div>
+    <div class="stat"><strong><%= o.pending %></strong><span>Orders awaiting shipment</span></div>
+    <div class="stat"><strong><%= o.customers %></strong><span>Customers</span></div>
+    <div class="stat"><strong><%= o.sellers %></strong><span>Sellers</span></div>
+    <div class="stat"><strong><%= o.active %> / <%= o.products %></strong><span>Live / total products</span></div>
+    <div class="stat"><strong><%= o.low %></strong><span>Low-stock products</span></div>
+    <div class="stat"><strong><%= o.subscribers %></strong><span>Newsletter subscribers</span></div>
+    <div class="stat"><strong><%= o.unread %></strong><span>Unread contact messages</span></div>
+  </div>
+
+  <div class="panel-grid">
+    <section class="card">
+      <div class="section-head"><h2>Recent orders</h2><a href="/admin/orders">All orders</a></div>
+      <% if (!recent.length) { %><p class="muted">No orders yet.</p><% } else { %>
+        <ul class="mini-list">
+          <% recent.forEach((r) => { %>
+            <li>
+              <span><a href="/admin/orders/<%= r.order_number %>"><strong><%= r.order_number %></strong></a><br><span class="muted"><%= r.ship_name %> &middot; <%= h.dateShort(r.placed_at) %></span></span>
+              <span><%= h.money(r.total) %> <span class="status-pill <%= h.statusTone(r.status) %>"><%= h.statusLabel(r.status) %></span></span>
+            </li>
+          <% }) %>
+        </ul>
+      <% } %>
+    </section>
+
+    <div class="stack">
+      <section class="card">
+        <h2>Low stock</h2>
+        <% if (!lowStock.length) { %><p class="muted">Nothing is running low.</p><% } else { %>
+          <ul class="mini-list">
+            <% lowStock.forEach((p) => { %><li><a href="/admin/products/<%= p.id %>/edit"><%= p.name %></a><strong class="<%= p.stock === 0 ? 'text-bad' : 'text-warn' %>"><%= p.stock %> left</strong></li><% }) %>
+          </ul>
+        <% } %>
+      </section>
+      <section class="card">
+        <h2>Top searches (30 days)</h2>
+        <% if (!searches.top.length) { %><p class="muted">Searches will be ranked here.</p><% } else { %>
+          <ul class="mini-list">
+            <% searches.top.forEach((s) => { %><li><span><%= s.term %></span><span class="muted"><%= s.searches %>&times; &middot; <%= s.results %> results</span></li><% }) %>
+          </ul>
+        <% } %>
+      </section>
+      <section class="card">
+        <h2>Searches with no results</h2>
+        <% if (!searches.empty.length) { %><p class="muted">No missed searches. Nice.</p><% } else { %>
+          <p class="muted">Add these as products or keywords to capture lost demand.</p>
+          <ul class="mini-list">
+            <% searches.empty.forEach((s) => { %><li><span><%= s.term %></span><span class="text-bad"><%= s.searches %>&times;</span></li><% }) %>
+          </ul>
+        <% } %>
+      </section>
+    </div>
+  </div>
+</div>
+<%- include('../partials/footer') %>

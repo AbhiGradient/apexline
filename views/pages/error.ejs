@@ -1,0 +1,16 @@
+<%- include('../partials/head') %>
+<section class="container error-page">
+  <p class="error-code"><%= status %></p>
+  <h1><%= status === 404 ? 'Wrong turn. This page is off the map.' : 'Pit stop needed.' %></h1>
+  <p class="muted"><%= message %></p>
+  <form class="search search-inline" action="/search" method="get" role="search">
+    <label class="sr-only" for="error-q">Search products</label>
+    <input id="error-q" type="search" name="q" placeholder="Search for a part..." autocomplete="off">
+    <button type="submit" aria-label="Search"><%- include('../partials/icon', { name: 'search' }) %></button>
+  </form>
+  <div class="row">
+    <a class="btn btn-primary" href="/">Back to Home</a>
+    <a class="btn btn-dark" href="/shop">Browse All Parts</a>
+  </div>
+</section>
+<%- include('../partials/footer') %>

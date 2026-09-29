@@ -1,0 +1,18 @@
+<%- include('../partials/head') %>
+<div class="container">
+  <%- include('../partials/breadcrumbs', { crumbs: breadcrumbs }) %>
+  <header class="listing-head">
+    <h1>Shop by Brand</h1>
+    <p>Trusted performance names for intakes, tuning, suspension, brakes and lighting.</p>
+  </header>
+  <div class="card-grid section">
+    <% brands.forEach((b) => { %>
+      <a class="card" href="/brand/<%= b.slug %>">
+        <h3><%= b.name %></h3>
+        <p class="muted"><%= b.description %></p>
+        <strong><%= b.product_count %> products</strong>
+      </a>
+    <% }) %>
+  </div>
+</div>
+<%- include('../partials/footer') %>

@@ -1,0 +1,30 @@
+<%- include('../partials/head') %>
+<div class="container section">
+  <h1>Your Addresses</h1>
+  <div class="card-grid">
+    <a class="addr-add" href="/account/addresses/new">+ Add address</a>
+    <% addresses.forEach((a) => { %>
+      <article class="addr-card<%= a.is_default ? ' is-default' : '' %>">
+        <p><strong><%= a.label %></strong> <% if (a.is_default) { %><span class="badge">Default</span><% } %></p>
+        <p><%= a.full_name %></p>
+        <p><%= a.line1 %><% if (a.line2) { %>, <%= a.line2 %><% } %></p>
+        <p><%= a.city %>, <%= a.state %> <%= a.postal_code %></p>
+        <p class="muted">Phone: <%= a.phone %></p>
+        <div class="row">
+          <a class="btn btn-ghost btn-sm" href="/account/addresses/<%= a.id %>/edit">Edit</a>
+          <form class="inline-form" method="post" action="/account/addresses/<%= a.id %>/delete" data-confirm="Remove this address?">
+            <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+            <button class="btn btn-ghost btn-sm" type="submit">Remove</button>
+          </form>
+          <% if (!a.is_default) { %>
+            <form class="inline-form" method="post" action="/account/addresses/<%= a.id %>/default">
+              <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+              <button class="link-btn" type="submit">Set as default</button>
+            </form>
+          <% } %>
+        </div>
+      </article>
+    <% }) %>
+  </div>
+</div>
+<%- include('../partials/footer') %>

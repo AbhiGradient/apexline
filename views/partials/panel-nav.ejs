@@ -1,0 +1,11 @@
+<%
+const isAdminUser = user.role === 'admin';
+const root = isAdminUser ? '/admin' : '/seller';
+const tabs = isAdminUser
+  ? [['Dashboard', '/admin'], ['Products', '/admin/products'], ['Orders', '/admin/orders'], ['Users', '/admin/users'], ['Sellers', '/admin/sellers'], ['Categories', '/admin/categories'], ['Brands', '/admin/brands'], ['Vehicles', '/admin/vehicles'], ['Coupons', '/admin/coupons']]
+  : [['Dashboard', '/seller'], ['Products', '/seller/products'], ['Orders', '/seller/orders']];
+const isOn = (href) => (href === root ? currentPath === root : currentPath === href || currentPath.startsWith(`${href}/`));
+%>
+<nav class="tabs-bar" aria-label="<%= isAdminUser ? 'Admin' : 'Seller' %> sections">
+  <% tabs.forEach(([label, href]) => { %><a href="<%= href %>" class="<%= isOn(href) ? 'is-active' : '' %>"><%= label %></a><% }) %>
+</nav>

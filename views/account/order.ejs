@@ -1,0 +1,90 @@
+<%- include('../partials/head') %>
+<%
+const steps = ['placed', 'confirmed', 'packed', 'shipped', 'out_for_delivery', 'delivered'];
+const at = steps.indexOf(order.status);
+const canCancel = ['placed', 'confirmed'].includes(order.status) && order.items.every((i) => ['placed', 'confirmed'].includes(i.status));
+%>
+<div class="container section">
+  <p><a href="/account/orders">&larr; All orders</a></p>
+  <h1>Order <%= order.order_number %></h1>
+  <p class="muted">Placed on <%= h.dateShort(order.placed_at) %> &middot; <span class="status-pill <%= h.statusTone(order.status) %>"><%= h.statusLabel(order.status) %></span></p>
+
+  <% if (at >= 0) { %>
+    <ol class="steps" aria-label="Order progress">
+      <% steps.forEach((s, i) => { %><li class="<%= i < at ? 'is-done' : i === at ? 'is-current' : '' %>"><%= h.statusLabel(s) %></li><% }) %>
+    </ol>
+  <% } %>
+
+  <div class="cart-layout">
+    <div>
+      <section class="card">
+        <h2>Items</h2>
+        <% order.items.forEach((i) => { %>
+          <div class="line-item">
+            <img src="<%= h.imageUrl(i.product_image) %>" alt="<%= i.product_name %>" loading="lazy">
+            <div class="grow">
+              <% if (i.product_slug) { %><a href="/product/<%= i.product_slug %>"><strong><%= i.product_name %></strong></a><% } else { %><strong><%= i.product_name %></strong><% } %>
+              <p class="muted" style="margin:0">Qty <%= i.quantity %> &times; <%= h.money(i.unit_price) %> &middot; <span class="status-pill <%= h.statusTone(i.status) %>"><%= h.statusLabel(i.status) %></span></p>
+              <% if (i.status === 'delivered' && i.product_id) { %>
+                <% if (i.reviewed) { %>
+                  <p class="text-ok" style="margin:6px 0 0">You reviewed this product.</p>
+                <% } else { %>
+                  <details class="review-form">
+                    <summary>Write a review</summary>
+                    <form method="post" action="/account/orders/<%= order.order_number %>/review">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                      <input type="hidden" name="product_id" value="<%= i.product_id %>">
+                      <div class="field">
+                        <label for="rate-<%= i.id %>">Rating</label>
+                        <select id="rate-<%= i.id %>" name="rating" required>
+                          <option value="">Choose</option>
+                          <% [5, 4, 3, 2, 1].forEach((n) => { %><option value="<%= n %>"><%= n %> star<%= n === 1 ? '' : 's' %></option><% }) %>
+                        </select>
+                      </div>
+                      <div class="field"><label for="title-<%= i.id %>">Headline</label><input id="title-<%= i.id %>" type="text" name="title" maxlength="140"></div>
+                      <div class="field"><label for="body-<%= i.id %>">Your review</label><textarea id="body-<%= i.id %>" name="body" maxlength="2000"></textarea></div>
+                      <button class="btn btn-dark btn-sm" type="submit">Submit review</button>
+                    </form>
+                  </details>
+                <% } %>
+              <% } %>
+            </div>
+            <strong><%= h.money(i.line_total) %></strong>
+          </div>
+        <% }) %>
+      </section>
+
+      <section class="card" style="margin-top:16px">
+        <h2>Tracking</h2>
+        <ul class="timeline">
+          <% order.history.forEach((e) => { %>
+            <li><strong><%= h.statusLabel(e.status) %></strong> <span class="muted">&middot; <%= h.dateShort(e.created_at) %><% if (e.note) { %> &middot; <%= e.note %><% } %></span></li>
+          <% }) %>
+        </ul>
+      </section>
+    </div>
+
+    <aside>
+      <div class="summary">
+        <h2>Summary</h2>
+        <dl>
+          <div><dt>Subtotal</dt><dd><%= h.money(order.subtotal) %></dd></div>
+          <% if (Number(order.discount_amount) > 0) { %><div><dt>Discount <%= order.coupon_code ? `(${order.coupon_code})` : '' %></dt><dd>&minus;<%= h.money(order.discount_amount) %></dd></div><% } %>
+          <div><dt>Shipping</dt><dd><%= Number(order.shipping_fee) ? h.money(order.shipping_fee) : 'Free' %></dd></div>
+          <div><dt>GST included</dt><dd><%= h.money(order.tax_amount) %></dd></div>
+          <div class="total"><dt>Total</dt><dd><%= h.money(order.total) %></dd></div>
+        </dl>
+        <p class="muted">Payment: <%= order.payment_method.toUpperCase() %> &middot; <%= order.payment_status %></p>
+        <h3>Delivery address</h3>
+        <p style="margin:0"><%= order.ship_name %><br><%= order.ship_line1 %><% if (order.ship_line2) { %>, <%= order.ship_line2 %><% } %><br><%= order.ship_city %>, <%= order.ship_state %> <%= order.ship_postal_code %><br>Phone: <%= order.ship_phone %></p>
+        <% if (canCancel) { %>
+          <form method="post" action="/account/orders/<%= order.order_number %>/cancel" data-confirm="Cancel this order?" style="margin-top:16px">
+            <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+            <button class="btn btn-danger btn-block" type="submit">Cancel order</button>
+          </form>
+        <% } %>
+      </div>
+    </aside>
+  </div>
+</div>
+<%- include('../partials/footer') %>

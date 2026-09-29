@@ -1,0 +1,111 @@
+<%
+const isShopper = !user || user.role === 'customer';
+const cats = typeof navCategories !== 'undefined' ? navCategories : [];
+const firstName = user ? user.name.split(' ')[0] : '';
+const roleLinks = {
+  customer: [['Your Account', '/account'], ['Your Orders', '/account/orders'], ['Saved Addresses', '/account/addresses'], ['Wishlist', '/wishlist']],
+  seller: [['Seller Dashboard', '/seller'], ['My Products', '/seller/products'], ['Add New Product', '/seller/products/new'], ['Orders to Ship', '/seller/orders'], ['Login & Security', '/account/profile']],
+  admin: [['Admin Dashboard', '/admin'], ['All Products', '/admin/products'], ['All Orders', '/admin/orders'], ['Users', '/admin/users'], ['Sellers', '/admin/sellers'], ['Categories', '/admin/categories'], ['Coupons', '/admin/coupons'], ['Login & Security', '/account/profile']]
+};
+const on = (path) => (currentPath === path || currentPath.startsWith(`${path}/`) ? ' is-active' : '');
+%>
+<header class="site-header">
+  <div class="topbar">
+    <div class="container topbar-inner">
+      <p>Free shipping above <%= h.money(site.shipping.freeAbove) %> &middot; Fitment help: <a href="tel:<%= site.contact.phone.replace(/[^+\d]/g, '') %>"><%= site.contact.phone %></a></p>
+      <ul class="topbar-links">
+        <li><a href="/account/orders">Track Order</a></li>
+        <li><a href="/login?as=seller">Sell on <%= site.shortName %></a></li>
+        <li><a href="/support">Help</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="navbar">
+    <div class="container navbar-inner">
+      <a class="brand" href="/" aria-label="<%= site.name %> home">
+        <span class="brand-mark"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M14 46 32 14l18 32h-9L32 30l-9 16z" fill="currentColor"/></svg></span>
+        <span class="brand-text"><strong>APEXLINE</strong><small>Motorworks</small></span>
+      </a>
+
+      <form class="search" action="/search" method="get" role="search">
+        <label class="sr-only" for="search-cat">Search category</label>
+        <select id="search-cat" name="cat">
+          <option value="">All</option>
+          <% cats.forEach((c) => { %><option value="<%= c.slug %>"><%= c.name %></option><% }) %>
+        </select>
+        <label class="sr-only" for="search-q">Search products</label>
+        <input id="search-q" type="search" name="q" value="<%= q %>" placeholder="Search air filters, exhausts, coilovers, ECU tuners..." autocomplete="off" data-search-input>
+        <button type="submit" aria-label="Search"><%- include('icon', { name: 'search' }) %></button>
+        <div class="search-suggest" role="listbox" data-search-suggest hidden></div>
+      </form>
+
+      <div class="nav-actions">
+        <div class="nav-item nav-account" data-dropdown>
+          <button class="nav-link" type="button" aria-haspopup="true" aria-expanded="false" data-dropdown-toggle>
+            <small>Hello, <%= user ? firstName : 'sign in' %></small>
+            <span>Account <%- include('icon', { name: 'chevron' }) %></span>
+          </button>
+          <div class="dropdown" role="menu">
+            <% if (!user) { %>
+              <p class="dropdown-title">Sign in as</p>
+              <a class="btn btn-primary btn-block" href="/login?as=customer">Customer</a>
+              <div class="dropdown-split">
+                <a class="btn btn-dark" href="/login?as=seller">Seller</a>
+                <a class="btn btn-dark" href="/login?as=admin">Admin</a>
+              </div>
+              <p class="dropdown-note">New customer? <a href="/register">Start here</a></p>
+            <% } else { %>
+              <p class="dropdown-title"><%= user.name %> <span class="role-tag"><%= user.role %></span></p>
+              <ul class="dropdown-links">
+                <% roleLinks[user.role].forEach(([label, href]) => { %><li><a href="<%= href %>"><%= label %></a></li><% }) %>
+              </ul>
+              <form method="post" action="/logout">
+                <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                <button class="dropdown-signout" type="submit">Sign out</button>
+              </form>
+            <% } %>
+          </div>
+        </div>
+
+        <% if (isShopper) { %>
+          <a class="nav-link" href="/account/orders"><small>Returns</small><span>&amp; Orders</span></a>
+          <a class="nav-link nav-icon-link" href="/wishlist" aria-label="Wishlist">
+            <%- include('icon', { name: 'heart' }) %>
+            <span class="nav-count" data-badge="wish" <%= wishCount ? '' : 'hidden' %>><%= wishCount %></span>
+          </a>
+          <a class="nav-link nav-icon-link" href="/cart" aria-label="Cart">
+            <%- include('icon', { name: 'cart' }) %>
+            <span class="nav-count" data-badge="cart" <%= cartCount ? '' : 'hidden' %>><%= cartCount %></span>
+            <span class="nav-label">Cart</span>
+          </a>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <nav class="subnav" aria-label="Main">
+    <div class="container subnav-inner">
+      <div class="all-menu" data-dropdown>
+        <button class="subnav-link all-toggle" type="button" aria-expanded="false" data-dropdown-toggle>
+          <%- include('icon', { name: 'menu' }) %> All Parts
+        </button>
+        <div class="mega">
+          <% cats.forEach((c) => { %>
+            <div class="mega-col">
+              <a class="mega-title" href="/category/<%= c.slug %>"><%= c.name %></a>
+              <% c.children.forEach((ch) => { %><a href="/category/<%= ch.slug %>"><%= ch.name %></a><% }) %>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+      <a class="subnav-link<%= on('/shop') %>" href="/shop">Shop All</a>
+      <a class="subnav-link" href="/shop?sort=popular">Best Sellers</a>
+      <a class="subnav-link" href="/shop?sort=newest">New Arrivals</a>
+      <a class="subnav-link<%= on('/deals') %>" href="/deals">Deals</a>
+      <a class="subnav-link<%= on('/vehicles') %>" href="/vehicles">Shop by Vehicle</a>
+      <a class="subnav-link<%= on('/brands') %>" href="/brands">Brands</a>
+      <a class="subnav-link<%= on('/support') %>" href="/support">Support</a>
+    </div>
+  </nav>
+</header>

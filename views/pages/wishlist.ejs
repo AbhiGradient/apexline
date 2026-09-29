@@ -1,0 +1,16 @@
+<%- include('../partials/head') %>
+<div class="container section">
+  <h1>Your Wishlist</h1>
+  <% if (!items.length) { %>
+    <div class="empty-state">
+      <h2>Nothing saved yet</h2>
+      <p class="muted">Tap the heart on any part to keep it here.</p>
+      <a class="btn btn-primary" href="/shop">Browse All Parts</a>
+    </div>
+  <% } else { %>
+    <div class="grid-products">
+      <% items.forEach((p) => { %><%- include('../partials/product-card', { p }) %><% }) %>
+    </div>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

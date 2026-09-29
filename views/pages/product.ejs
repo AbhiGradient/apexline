@@ -1,0 +1,148 @@
+<%- include('../partials/head') %>
+<%
+const shopper = !user || user.role === 'customer';
+const off = h.discountPct(product.price, product.compare_price);
+const inStock = Number(product.stock) > 0;
+const maxQty = Math.max(1, Math.min(Number(product.stock), 10));
+const freeShip = Number(product.price) >= site.shipping.freeAbove;
+%>
+<div class="container">
+  <%- include('../partials/breadcrumbs', { crumbs: breadcrumbs }) %>
+
+  <article class="pdp">
+    <div class="pdp-gallery">
+      <div class="pdp-gallery-main">
+        <img data-gallery-main src="<%= gallery[0].src %>" alt="<%= gallery[0].alt %>" width="800" height="800" fetchpriority="high">
+      </div>
+      <% if (gallery.length > 1) { %>
+        <div class="pdp-thumbs">
+          <% gallery.forEach((g, i) => { %>
+            <button type="button" class="<%= i === 0 ? 'is-active' : '' %>" data-gallery-thumb data-src="<%= g.src %>" data-alt="<%= g.alt %>" aria-label="View image <%= i + 1 %>">
+              <img src="<%= g.src %>" alt="" width="70" height="70" loading="lazy">
+            </button>
+          <% }) %>
+        </div>
+      <% } %>
+    </div>
+
+    <div class="pdp-info">
+      <% if (product.brand_name) { %><p class="product-brand"><a href="/brand/<%= product.brand_slug %>"><%= product.brand_name %></a></p><% } %>
+      <h1><%= product.name %></h1>
+      <% if (Number(product.rating_count) > 0) { %>
+        <p class="rating">
+          <span class="stars" style="--rating:<%= product.rating_avg %>" aria-hidden="true"></span>
+          <strong><%= Number(product.rating_avg).toFixed(1) %></strong>
+          <a href="#reviews" class="rating-count">(<%= product.rating_count %> reviews)</a>
+        </p>
+      <% } %>
+      <p class="price-row">
+        <span class="pdp-price"><%= h.money(product.price) %></span>
+        <% if (off) { %><s class="price-old">MRP <%= h.money(product.compare_price) %></s><span class="badge badge-sale"><%= off %>% off</span><% } %>
+      </p>
+      <p class="muted">Inclusive of <%= site.gstRate %>% GST</p>
+      <p><%= product.short_description %></p>
+      <ul class="feature-list">
+        <li><%- include('../partials/icon', { name: 'shield' }) %> <%= site.warrantyMonths %>-month manufacturer warranty</li>
+        <li><%- include('../partials/icon', { name: 'return' }) %> <%= site.returnDays %>-day returns on unused parts</li>
+        <li><%- include('../partials/icon', { name: 'truck' }) %> <%= freeShip ? 'Free delivery' : `Delivery ${h.money(site.shipping.flatFee)}, free above ${h.money(site.shipping.freeAbove)}` %></li>
+        <li><%- include('../partials/icon', { name: 'wrench' }) %> Fitment help: <a href="tel:<%= site.contact.phone.replace(/[^+\d]/g, '') %>"><%= site.contact.phone %></a></li>
+      </ul>
+      <p class="muted">SKU: <%= product.sku %> &middot; Category: <a href="/category/<%= product.category_slug %>"><%= product.category_name %></a></p>
+    </div>
+
+    <aside class="buybox" aria-label="Purchase options">
+      <p class="pdp-price"><%= h.money(product.price) %></p>
+      <p class="<%= inStock ? (product.stock <= 5 ? 'text-warn' : 'text-ok') : 'text-bad' %>">
+        <%= inStock ? (product.stock <= 5 ? `Only ${product.stock} left in stock` : 'In stock') : 'Currently out of stock' %>
+      </p>
+      <p class="muted">Sold by <strong><%= product.store_name %></strong><br>Delivery in 3 to 7 business days</p>
+
+      <% if (shopper) { %>
+        <form action="/cart/add" method="post" data-ajax-form>
+          <input type="hidden" name="product_id" value="<%= product.id %>">
+          <div class="qty" data-qty>
+            <button type="button" data-qty-step="-1" aria-label="Decrease quantity">&minus;</button>
+            <input type="number" name="quantity" value="1" min="1" max="<%= maxQty %>" aria-label="Quantity">
+            <button type="button" data-qty-step="1" aria-label="Increase quantity">+</button>
+          </div>
+          <button class="btn btn-primary btn-block" type="submit" <%= inStock ? '' : 'disabled' %>>Add to Cart</button>
+        </form>
+        <form action="/cart/add" method="post" data-ajax-form>
+          <input type="hidden" name="product_id" value="<%= product.id %>">
+          <input type="hidden" name="quantity" value="1" data-qty-mirror>
+          <input type="hidden" name="buy_now" value="1">
+          <button class="btn btn-dark btn-block" type="submit" <%= inStock ? '' : 'disabled' %>>Buy Now</button>
+        </form>
+        <form action="/wishlist/toggle" method="post" class="wish-form<%= product.wished ? ' is-active' : '' %>" data-ajax-form style="position:static">
+          <input type="hidden" name="product_id" value="<%= product.id %>">
+          <button class="btn btn-ghost btn-block" type="submit"><%- include('../partials/icon', { name: 'heart' }) %> Save to Wishlist</button>
+        </form>
+      <% } else { %>
+        <p class="muted">You are signed in as <strong><%= user.role %></strong>. Shopping is available on customer accounts.</p>
+        <a class="btn btn-dark btn-block" href="<%= user.role === 'admin' ? '/admin/products' : '/seller/products' %>">Manage Products</a>
+      <% } %>
+    </aside>
+  </article>
+
+  <section class="pdp-section" aria-labelledby="desc-title">
+    <h2 id="desc-title">About This Part</h2>
+    <p><%= product.description %></p>
+  </section>
+
+  <% if (specs.length) { %>
+    <section class="pdp-section" aria-labelledby="spec-title">
+      <h2 id="spec-title">Specifications</h2>
+      <table class="spec-table">
+        <tbody>
+          <% specs.forEach((s) => { %><tr><th scope="row"><%= s.spec_key %></th><td><%= s.spec_value %></td></tr><% }) %>
+        </tbody>
+      </table>
+    </section>
+  <% } %>
+
+  <section class="pdp-section" aria-labelledby="fit-title">
+    <h2 id="fit-title">Fitment</h2>
+    <% if (fitment.length) { %>
+      <p class="muted">Confirmed to fit these vehicles:</p>
+      <div class="chips">
+        <% fitment.forEach((v) => { %><a class="chip" href="/vehicle/<%= v.slug %>"><%= v.make %> <%= v.model %> (<%= v.year_from %>+)</a><% }) %>
+      </div>
+    <% } else { %>
+      <p>This is a universal part. Confirm dimensions and connections against your car, or call <a href="tel:<%= site.contact.phone.replace(/[^+\d]/g, '') %>"><%= site.contact.phone %></a> for fitment advice.</p>
+    <% } %>
+  </section>
+
+  <section class="pdp-section" id="reviews" aria-labelledby="rev-title">
+    <h2 id="rev-title">Customer Reviews</h2>
+    <% if (reviews.length) { %>
+      <% reviews.forEach((r) => { %>
+        <div class="review">
+          <p class="rating"><span class="stars" style="--rating:<%= r.rating %>" aria-hidden="true"></span> <strong><%= r.title || `${r.rating} out of 5` %></strong></p>
+          <p><%= r.body %></p>
+          <p class="muted"><%= r.name %> &middot; <%= h.dateShort(r.created_at) %></p>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <p class="muted">No reviews yet. Purchased this part? Reviews open from your order history.</p>
+    <% } %>
+  </section>
+
+  <% if (related.length) { %>
+    <section class="pdp-section" aria-labelledby="rel-title">
+      <h2 id="rel-title">Customers Also Viewed</h2>
+      <div class="grid-products">
+        <% related.forEach((p) => { %><%- include('../partials/product-card', { p }) %><% }) %>
+      </div>
+    </section>
+  <% } %>
+
+  <% if (viewed.length) { %>
+    <section class="pdp-section" aria-labelledby="rv-title">
+      <h2 id="rv-title">Your Recently Viewed</h2>
+      <div class="grid-products">
+        <% viewed.forEach((p) => { %><%- include('../partials/product-card', { p }) %><% }) %>
+      </div>
+    </section>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

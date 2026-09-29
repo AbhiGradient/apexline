@@ -1,0 +1,120 @@
+<%- include('../partials/head') %>
+<div class="container section" style="max-width:980px">
+  <%- include('../partials/panel-nav') %>
+  <div class="panel-head">
+    <h1><%= mode === 'new' ? 'Add product' : 'Edit product' %></h1>
+    <% if (mode === 'edit' && p.status === 'active') { %><a class="btn btn-ghost" href="/product/<%= p.slug %>" target="_blank" rel="noopener">View in store</a><% } %>
+  </div>
+
+  <% if (errors.length) { %><ul class="form-errors" role="alert"><% errors.forEach((e) => { %><li><%= e %></li><% }) %></ul><% } %>
+
+  <form method="post" action="<%= mode === 'new' ? `${base}/products` : `${base}/products/${p.id}` %>">
+    <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+
+    <section class="card form-section" style="margin-top:0">
+      <h2>Basics</h2>
+      <% if (admin && mode === 'new') { %>
+        <div class="field">
+          <label for="f-seller">Seller</label>
+          <select id="f-seller" name="seller_id" required>
+            <option value="">Choose the owning seller</option>
+            <% sellers.forEach((s) => { %><option value="<%= s.id %>" <%= String(sellerId) === String(s.id) ? 'selected' : '' %>><%= s.store_name %></option><% }) %>
+          </select>
+        </div>
+      <% } else if (admin) { %>
+        <p class="muted">Seller: <strong><%= p.store_name %></strong></p>
+      <% } %>
+      <div class="field"><label for="f-name">Product name</label><input id="f-name" type="text" name="name" value="<%= p.name %>" required maxlength="200"></div>
+      <div class="form-grid">
+        <div class="field">
+          <label for="f-cat">Category</label>
+          <select id="f-cat" name="category_id" required>
+            <option value="">Choose a category</option>
+            <% categories.forEach((t) => { %>
+              <% if (t.children.length) { %>
+                <optgroup label="<%= t.name %>">
+                  <option value="<%= t.id %>" <%= Number(p.category_id) === t.id ? 'selected' : '' %>>All <%= t.name %> (general)</option>
+                  <% t.children.forEach((c) => { %><option value="<%= c.id %>" <%= Number(p.category_id) === c.id ? 'selected' : '' %>><%= c.name %></option><% }) %>
+                </optgroup>
+              <% } else { %>
+                <option value="<%= t.id %>" <%= Number(p.category_id) === t.id ? 'selected' : '' %>><%= t.name %></option>
+              <% } %>
+            <% }) %>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-brand">Brand</label>
+          <select id="f-brand" name="brand_id">
+            <option value="">No brand</option>
+            <% brands.forEach((b) => { %><option value="<%= b.id %>" <%= Number(p.brand_id) === b.id ? 'selected' : '' %>><%= b.name %></option><% }) %>
+          </select>
+        </div>
+        <div class="field"><label for="f-sku">SKU</label><input id="f-sku" type="text" name="sku" value="<%= p.sku %>" maxlength="40" placeholder="Auto-generated if empty"></div>
+        <div class="field">
+          <label for="f-status">Status</label>
+          <select id="f-status" name="status">
+            <% ['active', 'draft', 'archived'].forEach((s) => { %><option value="<%= s %>" <%= p.status === s ? 'selected' : '' %>><%= s %></option><% }) %>
+          </select>
+          <p class="field-hint">Only active products appear in the store and in search.</p>
+        </div>
+      </div>
+      <div class="field"><label for="f-short">Short description</label><textarea id="f-short" name="short_description" required maxlength="300" style="min-height:80px"><%= p.short_description %></textarea><p class="field-hint">Shown on product cards and used as the default Google description.</p></div>
+      <div class="field"><label for="f-desc">Full description</label><textarea id="f-desc" name="description" required maxlength="5000" style="min-height:180px"><%= p.description %></textarea></div>
+    </section>
+
+    <section class="card form-section">
+      <h2>Price and stock</h2>
+      <div class="form-grid">
+        <div class="field"><label for="f-price">Selling price (₹, GST inclusive)</label><input id="f-price" type="number" name="price" value="<%= p.price %>" required min="1" step="0.01"></div>
+        <div class="field"><label for="f-mrp">MRP (₹, optional)</label><input id="f-mrp" type="number" name="compare_price" value="<%= p.compare_price ?? '' %>" min="1" step="0.01"><p class="field-hint">Higher than the price to show a discount badge.</p></div>
+        <div class="field"><label for="f-stock">Stock quantity</label><input id="f-stock" type="number" name="stock" value="<%= p.stock %>" required min="0" max="100000"></div>
+      </div>
+    </section>
+
+    <section class="card form-section">
+      <h2>Images</h2>
+      <div class="row" style="align-items:flex-start">
+        <% if (p.image) { %><img class="img-preview" src="<%= h.imageUrl(p.image) %>" alt="Current main image"><% } %>
+        <div class="field" style="flex:1;min-width:260px">
+          <label for="f-image">Main image</label>
+          <input id="f-image" type="text" name="image" value="<%= p.image || '' %>" maxlength="255" placeholder="my-air-filter.jpg or https://...">
+          <p class="field-hint">Type a filename you saved in <span class="code-hint">public/images/products/</span> or paste a full https:// image URL.</p>
+        </div>
+      </div>
+      <div class="field">
+        <label for="f-images">Extra images (one per line)</label>
+        <textarea id="f-images" name="images" style="min-height:90px" placeholder="my-air-filter-2.jpg"><%= images %></textarea>
+      </div>
+    </section>
+
+    <section class="card form-section">
+      <h2>Specifications and fitment</h2>
+      <div class="field">
+        <label for="f-specs">Specifications (one per line as <span class="code-hint">Name: Value</span>)</label>
+        <textarea id="f-specs" name="specs" style="min-height:130px" placeholder="Material: Stainless steel&#10;Warranty: 12 months"><%= specs %></textarea>
+      </div>
+      <fieldset class="field" style="border:0;padding:0;margin:0">
+        <legend style="font-weight:600;margin-bottom:6px">Fits these vehicles (leave all unticked for a universal part)</legend>
+        <div class="check-grid">
+          <% vehicles.forEach((veh) => { %>
+            <label class="check"><input type="checkbox" name="vehicles" value="<%= veh.id %>" <%= fitment.includes(veh.id) ? 'checked' : '' %>> <%= veh.make %> <%= veh.model %></label>
+          <% }) %>
+        </div>
+      </fieldset>
+    </section>
+
+    <section class="card form-section">
+      <h2>Search and SEO</h2>
+      <div class="field"><label for="f-keys">Search keywords</label><input id="f-keys" type="text" name="keywords" value="<%= p.keywords || '' %>" maxlength="400" placeholder="air filter, airfilter, panel filter, washable filter"><p class="field-hint">Comma-separated. Add spelling variants people really type. This is what makes the part appear when customers search.</p></div>
+      <div class="field"><label for="f-mt">SEO title (optional)</label><input id="f-mt" type="text" name="meta_title" value="<%= p.meta_title || '' %>" maxlength="160"></div>
+      <div class="field"><label for="f-md">SEO description (optional)</label><textarea id="f-md" name="meta_description" maxlength="300" style="min-height:80px"><%= p.meta_description || '' %></textarea></div>
+      <% if (admin) { %><label class="check"><input type="checkbox" name="is_featured" value="1" <%= Number(p.is_featured) ? 'checked' : '' %>> Featured product (home page hero and ranking boost)</label><% } %>
+    </section>
+
+    <div class="row" style="margin-top:22px">
+      <button class="btn btn-primary" type="submit"><%= mode === 'new' ? 'Add product' : 'Save changes' %></button>
+      <a class="btn btn-ghost" href="<%= base %>/products">Cancel</a>
+    </div>
+  </form>
+</div>
+<%- include('../partials/footer') %>

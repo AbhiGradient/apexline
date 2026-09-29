@@ -1,0 +1,17 @@
+<%
+const labels = { confirmed: 'Confirm', packed: 'Mark packed', shipped: 'Mark shipped', delivered: 'Mark delivered', cancelled: 'Cancel item', returned: 'Mark returned' };
+const next = steps(item.status);
+%>
+<% if (next.length) { %>
+  <div class="btn-row">
+    <% next.forEach((s) => { %>
+      <form class="inline-form" method="post" action="<%= action %>" <% if (s === 'cancelled' || s === 'returned') { %>data-confirm="<%= labels[s] %>? This restocks or refunds the item."<% } %>>
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <input type="hidden" name="status" value="<%= s %>">
+        <button class="btn btn-sm <%= s === 'cancelled' ? 'btn-danger' : s === 'returned' ? 'btn-ghost' : 'btn-primary' %>" type="submit"><%= labels[s] %></button>
+      </form>
+    <% }) %>
+  </div>
+<% } else { %>
+  <span class="muted">No further action</span>
+<% } %>

@@ -1,0 +1,33 @@
+<%- include('../partials/head') %>
+<div class="container section">
+  <%- include('../partials/panel-nav') %>
+  <div class="panel-head"><h1>Orders to ship</h1></div>
+
+  <nav class="tabs-bar" aria-label="Order filters">
+    <% [['open', 'To do'], ['shipped', 'Shipped'], ['delivered', 'Delivered'], ['closed', 'Cancelled / returned'], ['all', 'All']].forEach(([key, label]) => { %>
+      <a href="/seller/orders<%= key === 'open' ? '' : `?tab=${key}` %>" class="<%= tab === key ? 'is-active' : '' %>"><%= label %> (<%= counts[key] || 0 %>)</a>
+    <% }) %>
+  </nav>
+
+  <% if (!items.length) { %>
+    <div class="empty-state"><h2>Nothing here</h2><p class="muted">Order items in this group will show up here.</p></div>
+  <% } else { %>
+    <% items.forEach((i) => { %>
+      <article class="item-card">
+        <img src="<%= h.imageUrl(i.product_image) %>" alt="<%= i.product_name %>" loading="lazy">
+        <div>
+          <strong><%= i.product_name %></strong> <span class="status-pill <%= h.statusTone(i.status) %>"><%= h.statusLabel(i.status) %></span>
+          <p class="muted" style="margin:2px 0 8px"><%= i.product_sku %> &middot; Qty <%= i.quantity %> &times; <%= h.money(i.unit_price) %> = <strong><%= h.money(i.line_total) %></strong></p>
+          <p class="muted" style="margin:0 0 6px">Order <%= i.order_number %> &middot; <%= h.dateShort(i.placed_at) %> &middot; <%= i.payment_method.toUpperCase() %> (<%= i.payment_status %>)</p>
+          <address>
+            <%= i.ship_name %>, <%= i.ship_line1 %><% if (i.ship_line2) { %>, <%= i.ship_line2 %><% } %>, <%= i.ship_city %>, <%= i.ship_state %> <%= i.ship_postal_code %><br>
+            Phone: <%= i.ship_phone %>
+          </address>
+        </div>
+        <div><%- include('../partials/item-actions', { item: i, action: `/seller/orders/items/${i.id}/status` }) %></div>
+      </article>
+    <% }) %>
+    <%- include('../partials/pagination') %>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

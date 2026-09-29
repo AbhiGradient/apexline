@@ -1,0 +1,48 @@
+<%
+const off = h.discountPct(p.price, p.compare_price);
+const soldOut = Number(p.stock) <= 0;
+const lowStock = !soldOut && Number(p.stock) <= 5;
+const shopper = !user || user.role === 'customer';
+%>
+<article class="product-card">
+  <div class="product-card-media">
+    <a href="/product/<%= p.slug %>" tabindex="-1" aria-hidden="true">
+      <img src="<%= h.imageUrl(p.image) %>" alt="<%= p.name %>" width="480" height="480" loading="lazy" decoding="async">
+    </a>
+    <% if (off) { %><span class="badge badge-sale"><%= off %>% off</span><% } %>
+    <% if (shopper) { %>
+      <form class="wish-form<%= p.wished ? ' is-active' : '' %>" action="/wishlist/toggle" method="post" data-ajax-form>
+        <input type="hidden" name="product_id" value="<%= p.id %>">
+        <button type="submit" class="wish-btn" aria-label="Save <%= p.name %> to wishlist"><%- include('icon', { name: 'heart' }) %></button>
+      </form>
+    <% } %>
+  </div>
+  <div class="product-card-body">
+    <% if (p.brand_name) { %><p class="product-brand"><%= p.brand_name %></p><% } %>
+    <h3 class="product-title"><a href="/product/<%= p.slug %>"><%= p.name %></a></h3>
+    <% if (Number(p.rating_count) > 0) { %>
+      <p class="rating">
+        <span class="stars" style="--rating:<%= p.rating_avg %>" aria-hidden="true"></span>
+        <span class="rating-num"><%= Number(p.rating_avg).toFixed(1) %></span>
+        <span class="rating-count">(<%= p.rating_count %>)</span>
+      </p>
+    <% } %>
+    <p class="price-row">
+      <span class="price"><%= h.money(p.price) %></span>
+      <% if (off) { %><s class="price-old"><%= h.money(p.compare_price) %></s><% } %>
+    </p>
+    <p class="product-meta">
+      <% if (soldOut) { %><span class="text-bad">Out of stock</span>
+      <% } else if (lowStock) { %><span class="text-warn">Only <%= p.stock %> left</span>
+      <% } else if (Number(p.price) >= site.shipping.freeAbove) { %><span class="text-ok">Free delivery</span>
+      <% } else { %>In stock<% } %>
+    </p>
+  </div>
+  <% if (shopper) { %>
+    <form class="card-cart" action="/cart/add" method="post" data-ajax-form>
+      <input type="hidden" name="product_id" value="<%= p.id %>">
+      <input type="hidden" name="quantity" value="1">
+      <button type="submit" class="btn btn-primary btn-block" <%= soldOut ? 'disabled' : '' %>>Add to Cart</button>
+    </form>
+  <% } %>
+</article>

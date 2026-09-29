@@ -1,0 +1,74 @@
+<%- include('../partials/head') %>
+<div class="container section">
+  <%- include('../partials/panel-nav') %>
+  <div class="panel-head"><h1><%= def.title %> <span class="muted">(<%= rows.length %>)</span></h1></div>
+
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr><% def.columns.forEach((c) => { %><th><%= c[1] %></th><% }) %><th></th></tr>
+      </thead>
+      <tbody>
+        <% rows.forEach((r) => { %>
+          <tr>
+            <% def.columns.forEach(([key, , kind]) => { const cell = r[key]; %>
+              <td>
+                <% if (kind === 'bool') { %><span class="status-pill <%= cell ? 'is-good' : 'is-bad' %>"><%= cell ? 'Yes' : 'No' %></span>
+                <% } else if (kind === 'money') { %><%= h.money(cell) %>
+                <% } else if (kind === 'date') { %><%= cell ? h.dateShort(cell) : 'Never' %>
+                <% } else { %><%= cell === null || cell === undefined || cell === '' ? '-' : cell %><% } %>
+              </td>
+            <% }) %>
+            <td class="actions-cell">
+              <a class="btn btn-dark btn-sm" href="/admin/<%= entity %>?edit=<%= r.id %>">Edit</a>
+              <form class="inline-form" method="post" action="/admin/<%= entity %>/<%= r.id %>/delete" data-confirm="Delete this <%= def.singular %>?">
+                <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                <button class="btn btn-ghost btn-sm" type="submit">Delete</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <section class="card form-section" style="max-width:820px" id="form">
+    <h2><%= editing ? `Edit ${def.singular}` : `Add ${def.singular}` %></h2>
+    <% if (errors.length) { %><ul class="form-errors" role="alert"><% errors.forEach((e) => { %><li><%= e %></li><% }) %></ul><% } %>
+    <form method="post" action="<%= editing ? `/admin/${entity}/${editing.id}` : `/admin/${entity}` %>">
+      <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+      <div class="form-grid">
+        <% def.fields.forEach((f) => { const val = values[f.name] ?? ''; %>
+          <% if (f.type === 'checkbox') { %>
+            <label class="check field"><input type="checkbox" name="<%= f.name %>" value="1" <%= Number(val) ? 'checked' : '' %>> <%= f.label %></label>
+          <% } else if (f.type === 'textarea') { %>
+            <div class="field" style="grid-column:1 / -1">
+              <label for="c-<%= f.name %>"><%= f.label %></label>
+              <textarea id="c-<%= f.name %>" name="<%= f.name %>" maxlength="<%= f.max || 300 %>" style="min-height:90px"><%= val %></textarea>
+              <% if (f.hint) { %><p class="field-hint"><%= f.hint %></p><% } %>
+            </div>
+          <% } else if (f.type === 'select') { %>
+            <div class="field">
+              <label for="c-<%= f.name %>"><%= f.label %></label>
+              <select id="c-<%= f.name %>" name="<%= f.name %>">
+                <% choices[f.name].forEach(([value, label]) => { %><option value="<%= value %>" <%= String(val) === value ? 'selected' : '' %>><%= label %></option><% }) %>
+              </select>
+            </div>
+          <% } else { %>
+            <div class="field">
+              <label for="c-<%= f.name %>"><%= f.label %></label>
+              <input id="c-<%= f.name %>" type="<%= f.type === 'datetime' ? 'datetime-local' : f.type === 'number' ? 'number' : 'text' %>" name="<%= f.name %>" value="<%= val %>"
+                <%= f.required ? 'required' : '' %> <% if (f.type === 'number') { %>min="<%= f.min ?? 0 %>" step="<%= f.int ? 1 : 'any' %>"<% } else { %>maxlength="<%= f.max || 120 %>"<% } %>>
+              <% if (f.hint) { %><p class="field-hint"><%= f.hint %></p><% } %>
+            </div>
+          <% } %>
+        <% }) %>
+      </div>
+      <div class="row">
+        <button class="btn btn-primary" type="submit"><%= editing ? 'Save changes' : `Add ${def.singular}` %></button>
+        <% if (editing) { %><a class="btn btn-ghost" href="/admin/<%= entity %>">Cancel</a><% } %>
+      </div>
+    </form>
+  </section>
+</div>
+<%- include('../partials/footer') %>

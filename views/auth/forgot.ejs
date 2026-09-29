@@ -1,0 +1,23 @@
+<%- include('../partials/head') %>
+<section class="auth-wrap">
+  <div class="auth-card">
+    <h1>Forgot password</h1>
+    <% if (sent) { %>
+      <div class="flash flash-success" role="status"><span>If an account exists for <strong><%= email %></strong>, a reset link is on its way. It stays valid for 60 minutes.</span></div>
+      <p class="muted">Nothing in your inbox? Check spam, or try again in a few minutes.</p>
+      <a class="btn btn-dark btn-block" href="/login">Back to sign in</a>
+    <% } else { %>
+      <p class="muted">Enter the email on your account and we will send you a reset link.</p>
+      <form method="post" action="/forgot-password">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" name="email" required autocomplete="email" autofocus>
+        </div>
+        <button class="btn btn-primary btn-block" type="submit">Send reset link</button>
+      </form>
+      <div class="auth-links"><a href="/login">Back to sign in</a></div>
+    <% } %>
+  </div>
+</section>
+<%- include('../partials/footer') %>

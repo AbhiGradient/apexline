@@ -1,0 +1,45 @@
+<%- include('../partials/head') %>
+<%
+const tabs = [['customer', 'Customer'], ['seller', 'Seller'], ['admin', 'Admin']];
+const blurb = {
+  customer: 'Sign in to check out, track orders and save your wishlist.',
+  seller: 'Sign in to manage your products and orders.',
+  admin: 'Store administration. Authorised staff only.'
+};
+const suffix = nextUrl ? `&next=${encodeURIComponent(nextUrl)}` : '';
+%>
+<section class="auth-wrap">
+  <div class="auth-card">
+    <h1>Sign in</h1>
+    <nav class="auth-tabs" aria-label="Account type">
+      <% tabs.forEach(([key, label]) => { %>
+        <a href="/login?as=<%= key %><%= suffix %>" class="<%= as === key ? 'is-active' : '' %>"><%= label %></a>
+      <% }) %>
+    </nav>
+    <p class="muted"><%= blurb[as] %></p>
+
+    <% if (error) { %><div class="form-errors" role="alert"><%= error %></div><% } %>
+
+    <form method="post" action="/login">
+      <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+      <input type="hidden" name="as" value="<%= as %>">
+      <input type="hidden" name="next" value="<%= nextUrl %>">
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" type="email" name="email" value="<%= email %>" required autocomplete="username" autofocus>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" type="password" name="password" required autocomplete="current-password">
+      </div>
+      <button class="btn btn-primary btn-block" type="submit">Sign in as <%= as %></button>
+    </form>
+
+    <div class="auth-links">
+      <a href="/forgot-password">Forgot password?</a>
+      <% if (as === 'customer') { %><a href="/register<%= nextUrl ? `?next=${encodeURIComponent(nextUrl)}` : '' %>">Create account</a><% } %>
+    </div>
+    <% if (as === 'seller') { %><p class="muted" style="margin-top:14px">Seller accounts are created by the <%= site.shortName %> admin.</p><% } %>
+  </div>
+</section>
+<%- include('../partials/footer') %>

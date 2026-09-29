@@ -1,0 +1,66 @@
+<%- include('../partials/head') %>
+<div class="container section">
+  <h1>Checkout</h1>
+  <ol class="steps" aria-label="Checkout steps">
+    <li class="is-done">Cart</li>
+    <li class="is-current">Address &amp; Payment</li>
+    <li>Confirmation</li>
+  </ol>
+
+  <form class="cart-layout" method="post" action="/checkout/place">
+    <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+    <div>
+      <section class="card">
+        <h2>1. Delivery address</h2>
+        <% addresses.forEach((a) => { %>
+          <label class="option-card">
+            <input type="radio" name="address_id" value="<%= a.id %>" <%= a.id === selected.id ? 'checked' : '' %> required>
+            <span>
+              <strong><%= a.full_name %></strong> <span class="badge"><%= a.label %></span><br>
+              <%= a.line1 %><% if (a.line2) { %>, <%= a.line2 %><% } %>, <%= a.city %>, <%= a.state %> <%= a.postal_code %><br>
+              <span class="muted">Phone: <%= a.phone %></span>
+            </span>
+          </label>
+        <% }) %>
+        <p style="margin-top:12px"><a href="/account/addresses/new?next=/checkout">+ Add a new address</a></p>
+      </section>
+
+      <section class="card" style="margin-top:16px">
+        <h2>2. Payment method</h2>
+        <% methods.forEach(([key, label, hint], idx) => { %>
+          <label class="option-card">
+            <input type="radio" name="payment_method" value="<%= key %>" <%= idx === 0 ? 'checked' : '' %> required>
+            <span><strong><%= label %></strong><br><span class="muted"><%= hint %></span></span>
+          </label>
+        <% }) %>
+        <p class="field-hint">Demo checkout: online payment options are simulated and no money is charged.</p>
+      </section>
+
+      <section class="card" style="margin-top:16px">
+        <h2>3. Review items</h2>
+        <% items.forEach((i) => { %>
+          <div class="line-item">
+            <img src="<%= h.imageUrl(i.image) %>" alt="<%= i.name %>" loading="lazy">
+            <div class="grow"><strong><%= i.name %></strong><p class="muted" style="margin:0">Qty <%= i.quantity %></p></div>
+            <strong><%= h.money(i.lineTotal) %></strong>
+          </div>
+        <% }) %>
+        <p style="margin-top:12px"><a href="/cart">Edit cart</a></p>
+      </section>
+    </div>
+
+    <aside class="summary" aria-label="Order summary">
+      <h2>Order Summary</h2>
+      <dl>
+        <div><dt>Subtotal</dt><dd><%= h.money(t.subtotal) %></dd></div>
+        <% if (coupon) { %><div><dt>Coupon <%= coupon.code %></dt><dd>&minus;<%= h.money(t.discount) %></dd></div><% } %>
+        <div><dt>Shipping</dt><dd><%= t.shipping ? h.money(t.shipping) : 'Free' %></dd></div>
+        <div><dt>GST included</dt><dd><%= h.money(t.tax) %></dd></div>
+        <div class="total"><dt>Order total</dt><dd><%= h.money(t.total) %></dd></div>
+      </dl>
+      <button class="btn btn-primary btn-block" type="submit">Place Order</button>
+      <p class="field-hint" style="margin-top:10px">By placing your order you agree to our <a href="/terms">Terms</a> and <a href="/return-policy">Return Policy</a>.</p>
+    </aside>
+  </form>
+</div>
+<%- include('../partials/footer') %>

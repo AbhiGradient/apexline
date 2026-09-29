@@ -1,0 +1,21 @@
+<%- include('../partials/head') %>
+<div class="container">
+  <%- include('../partials/breadcrumbs', { crumbs: breadcrumbs }) %>
+  <header class="listing-head">
+    <h1>Shop Parts by Vehicle</h1>
+    <p>Pick your car to see upgrades matched to it, plus universal parts that fit most models.</p>
+  </header>
+  <% Object.entries(groups).forEach(([make, models]) => { %>
+    <h2 class="make-title"><%= make %></h2>
+    <div class="card-grid">
+      <% models.forEach((v) => { %>
+        <a class="card" href="/vehicle/<%= v.slug %>">
+          <h3><%= v.make %> <%= v.model %></h3>
+          <p class="muted"><%= v.year_from %> onwards</p>
+          <strong><%= v.product_count %> matched parts</strong>
+        </a>
+      <% }) %>
+    </div>
+  <% }) %>
+</div>
+<%- include('../partials/footer') %>

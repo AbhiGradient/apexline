@@ -1,0 +1,56 @@
+<%- include('../partials/head') %>
+<div class="container section">
+  <%- include('../partials/panel-nav') %>
+  <div class="panel-head">
+    <h1><%= seller.store_name %></h1>
+    <a class="btn btn-primary" href="/seller/products/new">+ Add Product</a>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><strong><%= stats.active %></strong><span>Live products</span></div>
+    <div class="stat"><strong><%= stats.low %></strong><span>Low stock (5 or fewer)</span></div>
+    <div class="stat"><strong><%= stats.toShip %></strong><span>Items to ship</span></div>
+    <div class="stat"><strong><%= h.money(stats.revenue) %></strong><span>Sales (excl. cancelled)</span></div>
+    <div class="stat"><strong><%= h.money(stats.delivered) %></strong><span>Delivered sales</span></div>
+  </div>
+
+  <div class="panel-grid">
+    <section class="card">
+      <div class="section-head"><h2>Recent order items</h2><a href="/seller/orders">Open orders</a></div>
+      <% if (!recent.length) { %>
+        <p class="muted">No orders yet. They appear here as soon as a customer buys one of your products.</p>
+      <% } else { %>
+        <ul class="mini-list">
+          <% recent.forEach((i) => { %>
+            <li>
+              <span><strong><%= i.product_name %></strong><br><span class="muted"><%= i.order_number %> &middot; Qty <%= i.quantity %></span></span>
+              <span class="status-pill <%= h.statusTone(i.status) %>"><%= h.statusLabel(i.status) %></span>
+            </li>
+          <% }) %>
+        </ul>
+      <% } %>
+    </section>
+
+    <div class="stack">
+      <section class="card">
+        <h2>Low stock</h2>
+        <% if (!lowStock.length) { %><p class="muted">All good. Nothing is running low.</p><% } else { %>
+          <ul class="mini-list">
+            <% lowStock.forEach((p) => { %>
+              <li><a href="/seller/products/<%= p.id %>/edit"><%= p.name %></a><strong class="<%= p.stock === 0 ? 'text-bad' : 'text-warn' %>"><%= p.stock %> left</strong></li>
+            <% }) %>
+          </ul>
+        <% } %>
+      </section>
+      <section class="card">
+        <h2>Best sellers</h2>
+        <% if (!top.length) { %><p class="muted">Sales will rank your products here.</p><% } else { %>
+          <ul class="mini-list">
+            <% top.forEach((p) => { %><li><a href="/seller/products/<%= p.id %>/edit"><%= p.name %></a><span><%= p.sold_count %> sold</span></li><% }) %>
+          </ul>
+        <% } %>
+      </section>
+    </div>
+  </div>
+</div>
+<%- include('../partials/footer') %>

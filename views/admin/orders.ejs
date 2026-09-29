@@ -1,0 +1,42 @@
+<%- include('../partials/head') %>
+<div class="container section">
+  <%- include('../partials/panel-nav') %>
+  <div class="panel-head"><h1>All orders <span class="muted">(<%= total %>)</span></h1></div>
+
+  <form class="toolbar filter-form" method="get" action="/admin/orders">
+    <label class="sr-only" for="oq">Search orders</label>
+    <input id="oq" type="search" name="q" value="<%= filters.q %>" placeholder="Order number, email or name">
+    <label class="sr-only" for="ostatus">Status</label>
+    <select id="ostatus" name="status" data-autosubmit>
+      <option value="">All statuses</option>
+      <% statuses.forEach((s) => { %><option value="<%= s %>" <%= filters.status === s ? 'selected' : '' %>><%= h.statusLabel(s) %></option><% }) %>
+    </select>
+    <button class="btn btn-dark btn-sm" type="submit">Filter</button>
+    <a class="btn btn-ghost btn-sm" href="/admin/orders">Clear</a>
+  </form>
+
+  <% if (!items.length) { %>
+    <div class="empty-state"><h2>No orders found</h2></div>
+  <% } else { %>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>Order</th><th>Date</th><th>Customer</th><th>Total</th><th>Payment</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          <% items.forEach((o) => { %>
+            <tr>
+              <td><strong><%= o.order_number %></strong></td>
+              <td><%= h.dateShort(o.placed_at) %></td>
+              <td><%= o.ship_name %><br><span class="muted"><%= o.email %></span></td>
+              <td><%= h.money(o.total) %></td>
+              <td><%= o.payment_method.toUpperCase() %> &middot; <%= o.payment_status %></td>
+              <td><span class="status-pill <%= h.statusTone(o.status) %>"><%= h.statusLabel(o.status) %></span></td>
+              <td><a class="btn btn-dark btn-sm" href="/admin/orders/<%= o.order_number %>">Open</a></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <%- include('../partials/pagination') %>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

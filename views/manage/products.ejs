@@ -1,0 +1,77 @@
+<%- include('../partials/head') %>
+<div class="container section">
+  <%- include('../partials/panel-nav') %>
+  <div class="panel-head">
+    <h1>Products <span class="muted">(<%= total %>)</span></h1>
+    <a class="btn btn-primary" href="<%= base %>/products/new">+ Add Product</a>
+  </div>
+
+  <form class="toolbar filter-form" method="get" action="<%= base %>/products">
+    <label class="sr-only" for="pq">Search products</label>
+    <input id="pq" type="search" name="q" value="<%= filters.q %>" placeholder="Search name or SKU">
+    <label class="sr-only" for="pstatus">Status</label>
+    <select id="pstatus" name="status" data-autosubmit>
+      <option value="">All statuses</option>
+      <% ['active', 'draft', 'archived'].forEach((s) => { %><option value="<%= s %>" <%= filters.status === s ? 'selected' : '' %>><%= s %></option><% }) %>
+    </select>
+    <% if (admin) { %>
+      <label class="sr-only" for="pseller">Seller</label>
+      <select id="pseller" name="seller" data-autosubmit>
+        <option value="">All sellers</option>
+        <% sellers.forEach((s) => { %><option value="<%= s.id %>" <%= String(filters.seller) === String(s.id) ? 'selected' : '' %>><%= s.store_name %></option><% }) %>
+      </select>
+    <% } %>
+    <button class="btn btn-dark btn-sm" type="submit">Filter</button>
+    <a class="btn btn-ghost btn-sm" href="<%= base %>/products">Clear</a>
+  </form>
+
+  <% if (!items.length) { %>
+    <div class="empty-state">
+      <h2>No products found</h2>
+      <p class="muted">Add your first product, or clear the filters.</p>
+      <a class="btn btn-primary" href="<%= base %>/products/new">Add Product</a>
+    </div>
+  <% } else { %>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr><th>Image</th><th>Product</th><th>Category</th><% if (admin) { %><th>Seller</th><% } %><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          <% items.forEach((p) => { %>
+            <tr>
+              <td><img src="<%= h.imageUrl(p.image) %>" alt="" loading="lazy"></td>
+              <td><strong><%= p.name %></strong><% if (p.is_featured) { %> <span class="badge">Featured</span><% } %><br><span class="muted"><%= p.sku %></span></td>
+              <td><%= p.category_name %></td>
+              <% if (admin) { %><td><%= p.store_name %></td><% } %>
+              <td><%= h.money(p.price) %></td>
+              <td>
+                <form class="stock-form" method="post" action="<%= base %>/products/<%= p.id %>/stock" data-ajax-form>
+                  <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                  <label class="sr-only" for="stock-<%= p.id %>">Stock for <%= p.name %></label>
+                  <input id="stock-<%= p.id %>" type="number" name="stock" min="0" max="100000" value="<%= p.stock %>">
+                  <button class="btn btn-ghost btn-sm" type="submit">Save</button>
+                </form>
+              </td>
+              <td>
+                <form class="inline-form" method="post" action="<%= base %>/products/<%= p.id %>/status">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                  <label class="sr-only" for="st-<%= p.id %>">Status for <%= p.name %></label>
+                  <select id="st-<%= p.id %>" name="status" class="input" style="width:auto" data-autosubmit>
+                    <% ['active', 'draft', 'archived'].forEach((s) => { %><option value="<%= s %>" <%= p.status === s ? 'selected' : '' %>><%= s %></option><% }) %>
+                  </select>
+                </form>
+              </td>
+              <td class="actions-cell">
+                <a class="btn btn-dark btn-sm" href="<%= base %>/products/<%= p.id %>/edit">Edit</a>
+                <% if (p.status === 'active') { %><a class="btn btn-ghost btn-sm" href="/product/<%= p.slug %>" target="_blank" rel="noopener">View</a><% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <%- include('../partials/pagination') %>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

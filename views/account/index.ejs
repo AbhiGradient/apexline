@@ -1,0 +1,54 @@
+<%- include('../partials/head') %>
+<div class="container section">
+  <h1>Hello, <%= user.name.split(' ')[0] %></h1>
+
+  <div class="stats">
+    <div class="stat"><strong><%= stats.orders %></strong><span>Orders placed</span></div>
+    <div class="stat"><strong><%= stats.wishlist %></strong><span>Wishlist items</span></div>
+    <div class="stat"><strong><%= stats.addresses %></strong><span>Saved addresses</span></div>
+  </div>
+
+  <div class="card-grid">
+    <a class="card" href="/account/orders"><h3>Your Orders</h3><p class="muted">Track, cancel or review your purchases.</p></a>
+    <a class="card" href="/account/profile"><h3>Login &amp; Security</h3><p class="muted">Edit your name, phone number and password.</p></a>
+    <a class="card" href="/account/addresses"><h3>Your Addresses</h3><p class="muted">Manage delivery addresses.</p></a>
+    <a class="card" href="/wishlist"><h3>Your Wishlist</h3><p class="muted">Parts you have saved for later.</p></a>
+  </div>
+
+  <% if (recent.length) { %>
+    <section class="section" aria-labelledby="recent-title">
+      <div class="section-head"><h2 id="recent-title">Recent Orders</h2><a href="/account/orders">View all</a></div>
+      <% recent.forEach((o) => { %>
+        <article class="order-card">
+          <div class="order-card-head">
+            <div><span class="muted">Order</span><strong><%= o.order_number %></strong></div>
+            <div><span class="muted">Placed</span><strong><%= h.dateShort(o.placed_at) %></strong></div>
+            <div><span class="muted">Total</span><strong><%= h.money(o.total) %></strong></div>
+            <div><span class="status-pill <%= h.statusTone(o.status) %>"><%= h.statusLabel(o.status) %></span></div>
+          </div>
+          <div class="order-card-body">
+            <div class="thumb-row">
+              <% o.items.slice(0, 4).forEach((i) => { %><img src="<%= h.imageUrl(i.product_image) %>" alt="<%= i.product_name %>" loading="lazy"><% }) %>
+            </div>
+            <a class="btn btn-dark btn-sm" href="/account/orders/<%= o.order_number %>">View order</a>
+          </div>
+        </article>
+      <% }) %>
+    </section>
+  <% } %>
+
+  <% if (recommended.length) { %>
+    <section class="section" aria-labelledby="rec-title">
+      <div class="section-head"><h2 id="rec-title">Picked for You</h2></div>
+      <div class="grid-products"><% recommended.forEach((p) => { %><%- include('../partials/product-card', { p }) %><% }) %></div>
+    </section>
+  <% } %>
+
+  <% if (viewed.length) { %>
+    <section class="section" aria-labelledby="view-title">
+      <div class="section-head"><h2 id="view-title">Recently Viewed</h2></div>
+      <div class="grid-products"><% viewed.forEach((p) => { %><%- include('../partials/product-card', { p }) %><% }) %></div>
+    </section>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

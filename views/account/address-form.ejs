@@ -1,0 +1,33 @@
+<%- include('../partials/head') %>
+<div class="container section" style="max-width:760px">
+  <h1><%= mode === 'new' ? 'Add address' : 'Edit address' %></h1>
+  <% if (errors.length) { %><ul class="form-errors" role="alert"><% errors.forEach((e) => { %><li><%= e %></li><% }) %></ul><% } %>
+
+  <form class="card" method="post" action="<%= action %>">
+    <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+    <input type="hidden" name="next" value="<%= nextUrl %>">
+    <div class="form-grid">
+      <div class="field"><label for="a-label">Label</label><input id="a-label" type="text" name="label" value="<%= a.label %>" maxlength="40" placeholder="Home, Garage, Office"></div>
+      <div class="field"><label for="a-name">Recipient name</label><input id="a-name" type="text" name="full_name" value="<%= a.full_name %>" required maxlength="120" autocomplete="name"></div>
+      <div class="field"><label for="a-phone">Mobile number</label><input id="a-phone" type="tel" name="phone" value="<%= a.phone %>" required inputmode="numeric" autocomplete="tel"></div>
+      <div class="field"><label for="a-pin">PIN code</label><input id="a-pin" type="text" name="postal_code" value="<%= a.postal_code %>" required inputmode="numeric" maxlength="6" autocomplete="postal-code"></div>
+    </div>
+    <div class="field"><label for="a-line1">Street address</label><input id="a-line1" type="text" name="line1" value="<%= a.line1 %>" required maxlength="190" autocomplete="address-line1"></div>
+    <div class="field"><label for="a-line2">Landmark or area (optional)</label><input id="a-line2" type="text" name="line2" value="<%= a.line2 || '' %>" maxlength="190" autocomplete="address-line2"></div>
+    <div class="form-grid">
+      <div class="field"><label for="a-city">City</label><input id="a-city" type="text" name="city" value="<%= a.city %>" required maxlength="80" autocomplete="address-level2"></div>
+      <div class="field">
+        <label for="a-state">State</label>
+        <select id="a-state" name="state" required>
+          <% states.forEach((s) => { %><option value="<%= s %>" <%= a.state === s ? 'selected' : '' %>><%= s %></option><% }) %>
+        </select>
+      </div>
+    </div>
+    <label class="check field"><input type="checkbox" name="is_default" value="1" <%= a.is_default ? 'checked' : '' %>> Make this my default address</label>
+    <div class="row">
+      <button class="btn btn-primary" type="submit">Save address</button>
+      <a class="btn btn-ghost" href="<%= nextUrl || '/account/addresses' %>">Cancel</a>
+    </div>
+  </form>
+</div>
+<%- include('../partials/footer') %>

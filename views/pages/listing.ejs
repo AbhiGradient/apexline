@@ -1,0 +1,74 @@
+<%- include('../partials/head') %>
+<div class="container">
+  <%- include('../partials/breadcrumbs', { crumbs: breadcrumbs }) %>
+
+  <header class="listing-head">
+    <h1><%= heading %></h1>
+    <% if (intro) { %><p><%= intro %></p><% } %>
+    <% if (children.length) { %>
+      <div class="chips">
+        <% children.forEach((c) => { %><a class="chip" href="/category/<%= c.slug %>"><%= c.name %></a><% }) %>
+      </div>
+    <% } %>
+  </header>
+
+  <form class="toolbar filter-form" method="get" action="<%= pagePath %>">
+    <% Object.entries(hidden).forEach(([key, value]) => { if (value) { %>
+      <input type="hidden" name="<%= key %>" value="<%= value %>">
+    <% } }) %>
+
+    <% if (!lockBrand && brands.length) { %>
+      <label class="sr-only" for="f-brand">Brand</label>
+      <select id="f-brand" name="brand" data-autosubmit>
+        <option value="">All brands</option>
+        <% brands.forEach((b) => { %>
+          <option value="<%= b.slug %>" <%= current.brand === b.slug ? 'selected' : '' %>><%= b.name %> (<%= b.total %>)</option>
+        <% }) %>
+      </select>
+    <% } %>
+
+    <label class="sr-only" for="f-min">Minimum price</label>
+    <input id="f-min" type="number" name="min" min="0" placeholder="Min ₹" value="<%= current.min ?? '' %>">
+    <label class="sr-only" for="f-max">Maximum price</label>
+    <input id="f-max" type="number" name="max" min="0" placeholder="Max ₹" value="<%= current.max ?? '' %>">
+    <label class="check"><input type="checkbox" name="instock" value="1" <%= current.inStock ? 'checked' : '' %> data-autosubmit> In stock</label>
+
+    <label class="sr-only" for="f-sort">Sort by</label>
+    <select id="f-sort" name="sort" data-autosubmit>
+      <% sortOptions.forEach(([key, label]) => { %>
+        <option value="<%= key %>" <%= current.sort === key ? 'selected' : '' %>><%= key === 'relevance' && isSearch ? 'Relevance' : label %></option>
+      <% }) %>
+    </select>
+
+    <button class="btn btn-dark btn-sm" type="submit">Apply</button>
+    <a class="btn btn-ghost btn-sm" href="<%= isSearch ? `${pagePath}?q=${encodeURIComponent(q)}` : pagePath %>">Clear</a>
+    <span class="filter-count"><strong><%= total %></strong> <%= total === 1 ? 'product' : 'products' %></span>
+  </form>
+
+  <% if (items.length) { %>
+    <div class="grid-products">
+      <% items.forEach((p) => { %><%- include('../partials/product-card', { p }) %><% }) %>
+    </div>
+    <%- include('../partials/pagination') %>
+  <% } else { %>
+    <div class="empty-state">
+      <h2>No parts found</h2>
+      <p class="muted">
+        <% if (isSearch) { %>We could not find anything for "<%= q %>". Check the spelling, try a shorter term such as "air filter", or browse a category.<% } else { %>Nothing matches these filters yet. Try clearing them.<% } %>
+      </p>
+      <div class="row" style="justify-content:center">
+        <a class="btn btn-primary" href="/shop">Browse All Parts</a>
+        <a class="btn btn-dark" href="/vehicles">Shop by Vehicle</a>
+      </div>
+    </div>
+    <% if (fallback.length) { %>
+      <section class="section" aria-labelledby="pop-title">
+        <div class="section-head"><h2 id="pop-title">Popular Right Now</h2></div>
+        <div class="grid-products">
+          <% fallback.forEach((p) => { %><%- include('../partials/product-card', { p }) %><% }) %>
+        </div>
+      </section>
+    <% } %>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

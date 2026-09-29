@@ -1,0 +1,99 @@
+<%
+const cats = typeof navCategories !== 'undefined' ? navCategories : [];
+const socials = [
+  ['facebook', 'Facebook', site.socials.facebook],
+  ['x', 'X (Twitter)', site.socials.x],
+  ['instagram', 'Instagram', site.socials.instagram],
+  ['youtube', 'YouTube', site.socials.youtube]
+];
+%>
+  </main>
+
+  <footer class="site-footer">
+    <a class="back-top" href="#top" data-back-top>Back to top</a>
+
+    <div class="footer-news">
+      <div class="container footer-news-inner">
+        <div>
+          <h2>Get the build list</h2>
+          <p>New arrivals, track-day deals and tuning guides. No spam.</p>
+        </div>
+        <form action="/newsletter" method="post" data-ajax-form>
+          <label class="sr-only" for="news-email">Email address</label>
+          <input id="news-email" type="email" name="email" placeholder="you@example.com" required autocomplete="email">
+          <button type="submit" class="btn">Subscribe</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="container footer-grid">
+      <div class="footer-about">
+        <a class="brand" href="/" aria-label="<%= site.name %> home">
+          <span class="brand-mark"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M14 46 32 14l18 32h-9L32 30l-9 16z" fill="currentColor"/></svg></span>
+          <span class="brand-text"><strong>APEXLINE</strong><small>Motorworks</small></span>
+        </a>
+        <p><%= site.description %></p>
+        <address>
+          <p><%- include('icon', { name: 'pin' }) %> <%= site.contact.city %>, <%= site.contact.region %>, India</p>
+          <p><%- include('icon', { name: 'phone' }) %> <a href="tel:<%= site.contact.phone.replace(/[^+\d]/g, '') %>"><%= site.contact.phone %></a></p>
+          <p><%- include('icon', { name: 'mail' }) %> <a href="mailto:<%= site.contact.email %>"><%= site.contact.email %></a></p>
+        </address>
+        <ul class="footer-social">
+          <% socials.forEach(([icon, label, href]) => { %>
+            <li><a href="<%= href %>" target="_blank" rel="noopener noreferrer me" aria-label="<%= site.shortName %> on <%= label %>"><%- include('icon', { name: icon }) %></a></li>
+          <% }) %>
+        </ul>
+      </div>
+
+      <nav aria-label="Popular parts">
+        <h2>Popular Parts</h2>
+        <ul>
+          <li><a href="/category/air-filters">Performance Air Filters</a></li>
+          <li><a href="/category/cold-air-intakes">Cold Air Intakes</a></li>
+          <li><a href="/category/cat-back-exhausts">Cat-Back Exhausts</a></li>
+          <li><a href="/category/ecu-tuners">ECU Tuners</a></li>
+          <li><a href="/category/coilovers">Coilovers</a></li>
+          <li><a href="/category/brake-pads">Brake Pads</a></li>
+          <li><a href="/category/alloy-wheels">Alloy Wheels</a></li>
+        </ul>
+      </nav>
+
+      <nav aria-label="Shop by category">
+        <h2>Shop by Category</h2>
+        <ul>
+          <% cats.forEach((c) => { %><li><a href="/category/<%= c.slug %>"><%= c.name %></a></li><% }) %>
+          <li><a href="/brands">All Brands</a></li>
+          <li><a href="/vehicles">Shop by Vehicle</a></li>
+        </ul>
+      </nav>
+
+      <nav aria-label="Customer care">
+        <h2>Customer Care</h2>
+        <ul>
+          <li><a href="/account/orders">Track Your Order</a></li>
+          <li><a href="/support">Help Centre</a></li>
+          <li><a href="/faq">FAQs</a></li>
+          <li><a href="/shipping-policy">Shipping Policy</a></li>
+          <li><a href="/return-policy">Returns and Refunds</a></li>
+          <li><a href="/contact">Contact Us</a></li>
+          <li><a href="/login?as=seller">Become a Seller</a></li>
+        </ul>
+      </nav>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="container footer-bottom-inner">
+        <p>&copy; <%= new Date().getFullYear() %> <%= site.name %>. All rights reserved.</p>
+        <ul>
+          <li><a href="/about">About</a></li>
+          <li><a href="/privacy-policy">Privacy Policy</a></li>
+          <li><a href="/terms">Terms &amp; Conditions</a></li>
+          <li><a href="/sitemap">Sitemap</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/js/main.js" defer></script>
+</body>
+</html>

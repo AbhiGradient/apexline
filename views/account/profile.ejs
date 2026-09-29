@@ -1,0 +1,31 @@
+<%- include('../partials/head') %>
+<div class="container section">
+  <h1>Login &amp; Security</h1>
+
+  <div class="card-grid" style="grid-template-columns:repeat(auto-fit,minmax(320px,1fr))">
+    <section class="card">
+      <h2>Your Details</h2>
+      <% if (errors.length) { %><ul class="form-errors" role="alert"><% errors.forEach((e) => { %><li><%= e %></li><% }) %></ul><% } %>
+      <form method="post" action="/account/profile">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <div class="field"><label for="p-email">Email</label><input id="p-email" type="email" value="<%= account.email %>" disabled></div>
+        <div class="field"><label for="p-name">Full name</label><input id="p-name" type="text" name="name" value="<%= account.name %>" required maxlength="80"></div>
+        <div class="field"><label for="p-phone">Mobile number</label><input id="p-phone" type="tel" name="phone" value="<%= account.phone || '' %>" inputmode="numeric"></div>
+        <button class="btn btn-dark" type="submit">Save changes</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Change Password</h2>
+      <% if (pwErrors.length) { %><ul class="form-errors" role="alert"><% pwErrors.forEach((e) => { %><li><%= e %></li><% }) %></ul><% } %>
+      <form method="post" action="/account/password">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <div class="field"><label for="pw-current">Current password</label><input id="pw-current" type="password" name="current" required autocomplete="current-password"></div>
+        <div class="field"><label for="pw-new">New password</label><input id="pw-new" type="password" name="password" required minlength="8" autocomplete="new-password"></div>
+        <div class="field"><label for="pw-confirm">Confirm new password</label><input id="pw-confirm" type="password" name="confirm" required minlength="8" autocomplete="new-password"></div>
+        <button class="btn btn-dark" type="submit">Update password</button>
+      </form>
+    </section>
+  </div>
+</div>
+<%- include('../partials/footer') %>

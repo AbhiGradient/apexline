@@ -1,0 +1,37 @@
+<%- include('../partials/head') %>
+<div class="container section">
+  <%- include('../partials/breadcrumbs', { crumbs: breadcrumbs }) %>
+  <h1>Sitemap</h1>
+
+  <h2 class="make-title">Pages</h2>
+  <ul class="sitemap-cols">
+    <% staticLinks.forEach(([label, href]) => { %><li><a href="<%= href %>"><%= label %></a></li><% }) %>
+  </ul>
+
+  <h2 class="make-title">Categories</h2>
+  <ul class="sitemap-cols">
+    <% navCategories.forEach((c) => { %>
+      <li><a href="/category/<%= c.slug %>"><strong><%= c.name %></strong></a>
+        <ul>
+          <% c.children.forEach((ch) => { %><li><a href="/category/<%= ch.slug %>"><%= ch.name %></a></li><% }) %>
+        </ul>
+      </li>
+    <% }) %>
+  </ul>
+
+  <h2 class="make-title">Brands</h2>
+  <ul class="sitemap-cols">
+    <% brands.forEach((b) => { %><li><a href="/brand/<%= b.slug %>"><%= b.name %></a></li><% }) %>
+  </ul>
+
+  <h2 class="make-title">Vehicles</h2>
+  <ul class="sitemap-cols">
+    <% vehicles.forEach((v) => { %><li><a href="/vehicle/<%= v.slug %>"><%= v.make %> <%= v.model %></a></li><% }) %>
+  </ul>
+
+  <h2 class="make-title">All Products</h2>
+  <ul class="sitemap-cols">
+    <% products.forEach((p) => { %><li><a href="/product/<%= p.slug %>"><%= p.name %></a></li><% }) %>
+  </ul>
+</div>
+<%- include('../partials/footer') %>

@@ -1,0 +1,48 @@
+<%- include('../partials/head') %>
+<div class="container section">
+  <%- include('../partials/panel-nav') %>
+  <div class="panel-head"><h1>Sellers</h1></div>
+
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Store</th><th>Contact</th><th>GSTIN</th><th>Products</th><th>Sales</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        <% sellers.forEach((s) => { %>
+          <tr>
+            <td><strong><%= s.store_name %></strong><br><span class="muted"><%= s.slug %></span></td>
+            <td><%= s.name %><br><span class="muted"><%= s.email %></span></td>
+            <td><%= s.gstin || '-' %></td>
+            <td><%= s.products %></td>
+            <td><%= h.money(s.sales) %></td>
+            <td><span class="status-pill <%= s.status === 'active' ? 'is-good' : 'is-bad' %>"><%= s.status %></span></td>
+            <td>
+              <form class="inline-form" method="post" action="/admin/sellers/<%= s.id %>/status" data-confirm="<%= s.status === 'active' ? 'Suspend this seller? Their products disappear from the store.' : 'Activate this seller?' %>">
+                <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                <input type="hidden" name="status" value="<%= s.status === 'active' ? 'suspended' : 'active' %>">
+                <button class="btn btn-ghost btn-sm" type="submit"><%= s.status === 'active' ? 'Suspend' : 'Activate' %></button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <section class="card form-section" style="max-width:820px">
+    <h2>Add a seller</h2>
+    <% if (errors.length) { %><ul class="form-errors" role="alert"><% errors.forEach((e) => { %><li><%= e %></li><% }) %></ul><% } %>
+    <form method="post" action="/admin/sellers">
+      <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+      <div class="form-grid">
+        <div class="field"><label for="s-store">Store name</label><input id="s-store" type="text" name="store_name" value="<%= values.store_name %>" required maxlength="140"></div>
+        <div class="field"><label for="s-name">Contact name</label><input id="s-name" type="text" name="name" value="<%= values.name %>" required maxlength="80"></div>
+        <div class="field"><label for="s-email">Login email</label><input id="s-email" type="email" name="email" value="<%= values.email %>" required></div>
+        <div class="field"><label for="s-phone">Mobile (optional)</label><input id="s-phone" type="tel" name="phone" value="<%= values.phone %>" inputmode="numeric"></div>
+        <div class="field"><label for="s-gst">GSTIN (optional)</label><input id="s-gst" type="text" name="gstin" value="<%= values.gstin %>" maxlength="15"></div>
+        <div class="field"><label for="s-pass">Temporary password</label><input id="s-pass" type="password" name="password" required minlength="8" autocomplete="new-password"><p class="field-hint">The seller can change it under Login &amp; Security.</p></div>
+      </div>
+      <button class="btn btn-primary" type="submit">Create seller</button>
+    </form>
+  </section>
+</div>
+<%- include('../partials/footer') %>

@@ -1,0 +1,127 @@
+<%- include('../partials/head') %>
+
+<section class="hero" aria-labelledby="hero-title">
+  <div class="container hero-inner">
+    <div>
+      <span class="hero-kicker">Built for Indian roads and tracks</span>
+      <h1 id="hero-title">Make every mile <em>quicker.</em></h1>
+      <p>Air filters, intakes, exhausts, ECU tuners, coilovers and brakes, chosen by people who actually wrench on cars. Check fitment for your model before you buy.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="/shop">Shop All Parts</a>
+        <a class="btn" href="/deals">Today's Deals</a>
+      </div>
+      <form class="finder" action="/vehicles/find" method="get">
+        <label for="finder-vehicle">Find parts for your car</label>
+        <div class="finder-row">
+          <select id="finder-vehicle" name="vehicle" required>
+            <option value="">Select make and model</option>
+            <% vehicles.forEach((v) => { %><option value="<%= v.slug %>"><%= v.make %> <%= v.model %></option><% }) %>
+          </select>
+          <button class="btn btn-primary" type="submit">Find Parts</button>
+        </div>
+      </form>
+    </div>
+    <% if (hero) { %>
+      <a class="hero-media" href="/product/<%= hero.slug %>">
+        <img src="<%= h.imageUrl(hero.image) %>" alt="<%= hero.name %>" width="640" height="420" fetchpriority="high">
+      </a>
+    <% } %>
+  </div>
+</section>
+
+<div class="checker" aria-hidden="true"></div>
+
+<section class="trust-strip" aria-label="Why shop with us">
+  <div class="container">
+    <ul>
+      <li><%- include('../partials/icon', { name: 'truck' }) %><span>Free shipping<small>Above <%= h.money(site.shipping.freeAbove) %></small></span></li>
+      <li><%- include('../partials/icon', { name: 'shield' }) %><span><%= site.warrantyMonths %>-month warranty<small>On every part</small></span></li>
+      <li><%- include('../partials/icon', { name: 'return' }) %><span><%= site.returnDays %>-day returns<small>Unused, in original box</small></span></li>
+      <li><%- include('../partials/icon', { name: 'wrench' }) %><span>Fitment support<small>Call <%= site.contact.phone %></small></span></li>
+    </ul>
+  </div>
+</section>
+
+<section class="section container" aria-labelledby="cat-title">
+  <div class="section-head"><h2 id="cat-title">Shop by Category</h2><a href="/shop">View all</a></div>
+  <div class="tile-grid">
+    <% categories.forEach((c) => { %>
+      <a class="cat-tile" href="/category/<%= c.slug %>">
+        <div class="cat-tile-media"><img src="<%= h.imageUrl(c.cover_image) %>" alt="<%= c.name %>" width="320" height="240" loading="lazy"></div>
+        <div class="cat-tile-body"><strong><%= c.name %></strong><small><%= c.product_count %> products</small></div>
+      </a>
+    <% }) %>
+  </div>
+</section>
+
+<% if (recommended.length) { %>
+  <section class="section container" aria-labelledby="rec-title">
+    <div class="section-head"><h2 id="rec-title">Recommended for You</h2></div>
+    <div class="grid-products">
+      <% recommended.forEach((p) => { %><%- include('../partials/product-card', { p }) %><% }) %>
+    </div>
+  </section>
+<% } %>
+
+<% if (deals.length) { %>
+  <section class="section container" aria-labelledby="deal-title">
+    <div class="section-head"><h2 id="deal-title">Top Deals</h2><a href="/deals">All deals</a></div>
+    <div class="grid-products">
+      <% deals.forEach((p) => { %><%- include('../partials/product-card', { p }) %><% }) %>
+    </div>
+  </section>
+<% } %>
+
+<section class="section container">
+  <div class="promo">
+    <div>
+      <h2>Ten percent off your first order</h2>
+      <p>Use code <strong>WELCOME10</strong> at checkout on orders above <%= h.money(999) %>. Maximum saving <%= h.money(1500) %>.</p>
+    </div>
+    <a class="btn btn-dark" href="/register">Create Account</a>
+  </div>
+</section>
+
+<section class="section container" aria-labelledby="best-title">
+  <div class="section-head"><h2 id="best-title">Best Sellers</h2><a href="/shop?sort=popular">See more</a></div>
+  <div class="grid-products">
+    <% bestsellers.forEach((p) => { %><%- include('../partials/product-card', { p }) %><% }) %>
+  </div>
+</section>
+
+<section class="section container" aria-labelledby="new-title">
+  <div class="section-head"><h2 id="new-title">New Arrivals</h2><a href="/shop?sort=newest">See more</a></div>
+  <div class="grid-products">
+    <% arrivals.forEach((p) => { %><%- include('../partials/product-card', { p }) %><% }) %>
+  </div>
+</section>
+
+<section class="section container" aria-labelledby="brand-title">
+  <div class="section-head"><h2 id="brand-title">Shop by Brand</h2><a href="/brands">All brands</a></div>
+  <div class="brand-pills">
+    <% brands.forEach((b) => { %><a class="chip" href="/brand/<%= b.slug %>"><%= b.name %></a><% }) %>
+  </div>
+</section>
+
+<section class="section container" aria-labelledby="about-title">
+  <div class="section-head"><h2 id="about-title">Performance Car Parts, Explained Honestly</h2></div>
+  <div class="seo-copy">
+    <div>
+      <p><%= site.name %> is an online store for car performance mods in India. We stock performance air filters, cold air intake kits, cat-back exhaust systems, ECU tuners, coilovers, brake pads, slotted discs and alloy wheels for popular cars like the Swift, Creta, Thar, Slavia and Fortuner.</p>
+      <p>A good upgrade starts with breathing. A washable high-flow air filter or a cold air intake lets your engine draw cooler, denser air, and it pairs well with a free-flowing exhaust for a sharper throttle response and a better sound.</p>
+    </div>
+    <div>
+      <p>Handling and braking matter just as much as power. Adjustable coilovers, a thicker sway bar and ceramic brake pads change how confident the car feels on a twisty road or a track day.</p>
+      <p>Every product page lists the cars it fits, real specifications and warranty details. Prices include GST, and our team is a call away when you are choosing between two parts.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section container faq" aria-labelledby="faq-title">
+  <div class="section-head"><h2 id="faq-title">Frequently Asked Questions</h2><a href="/faq">All FAQs</a></div>
+  <% faqs.forEach((f) => { %>
+    <details><summary><%= f.q %></summary><p><%= f.a %></p></details>
+  <% }) %>
+</section>
+
+<%- include('../partials/footer') %>

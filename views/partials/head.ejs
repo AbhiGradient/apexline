@@ -1,0 +1,91 @@
+<%
+const s = typeof seo !== 'undefined' && seo ? seo : {};
+const pageTitle = s.rawTitle || (s.title ? `${s.title} | ${site.name}` : `${site.name} | ${site.tagline}`);
+const pageDesc = h.truncate(s.description || site.description, 158);
+const pageUrl = s.canonical || (typeof canonical !== 'undefined' ? canonical : site.url);
+const abs = (u) => (!u ? '' : /^https?:\/\//i.test(u) ? u : `${site.url}${u.startsWith('/') ? u : `/${u}`}`);
+const pageImage = abs(s.image) || `${site.url}/images/og-default.jpg`;
+const robots = s.noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+const graph = [
+  {
+    '@type': 'OnlineStore',
+    '@id': `${site.url}/#organization`,
+    name: site.name,
+    url: site.url,
+    logo: `${site.url}/images/logo.svg`,
+    image: `${site.url}/images/og-default.jpg`,
+    description: site.description,
+    telephone: site.contact.phone.replace(/[^+\d]/g, ''),
+    email: site.contact.email,
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: site.contact.city,
+      addressRegion: site.contact.region,
+      addressCountry: site.contact.country
+    },
+    areaServed: 'IN',
+    currenciesAccepted: site.currency.code,
+    sameAs: Object.values(site.socials)
+  },
+  {
+    '@type': 'WebSite',
+    '@id': `${site.url}/#website`,
+    url: site.url,
+    name: site.name,
+    inLanguage: 'en-IN',
+    publisher: { '@id': `${site.url}/#organization` },
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: { '@type': 'EntryPoint', urlTemplate: `${site.url}/search?q={search_term_string}` },
+      'query-input': 'required name=search_term_string'
+    }
+  }
+].concat(s.jsonLd || []);
+%><!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= pageTitle %></title>
+  <meta name="description" content="<%= pageDesc %>">
+  <% if (s.keywords) { %><meta name="keywords" content="<%= s.keywords %>"><% } %>
+  <meta name="robots" content="<%= robots %>">
+  <meta name="author" content="<%= site.name %>">
+  <meta name="theme-color" content="<%= site.themeColor %>">
+  <meta name="geo.region" content="IN-MH">
+  <meta name="geo.placename" content="Pune">
+  <link rel="canonical" href="<%= pageUrl %>">
+  <link rel="alternate" hreflang="en-IN" href="<%= pageUrl %>">
+  <link rel="alternate" hreflang="x-default" href="<%= pageUrl %>">
+  <% if (s.prev) { %><link rel="prev" href="<%= s.prev %>"><% } %>
+  <% if (s.next) { %><link rel="next" href="<%= s.next %>"><% } %>
+  <link rel="sitemap" type="application/xml" href="/sitemap.xml">
+  <link rel="icon" href="/images/favicon.svg" type="image/svg+xml">
+
+  <meta property="og:site_name" content="<%= site.name %>">
+  <meta property="og:locale" content="<%= site.locale %>">
+  <meta property="og:type" content="<%= s.type || 'website' %>">
+  <meta property="og:title" content="<%= pageTitle %>">
+  <meta property="og:description" content="<%= pageDesc %>">
+  <meta property="og:url" content="<%= pageUrl %>">
+  <meta property="og:image" content="<%= pageImage %>">
+  <meta property="og:image:alt" content="<%= s.imageAlt || pageTitle %>">
+  <% (s.meta || []).forEach(([key, value]) => { %><meta property="<%= key %>" content="<%= value %>">
+  <% }) %>
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="<%= pageTitle %>">
+  <meta name="twitter:description" content="<%= pageDesc %>">
+  <meta name="twitter:image" content="<%= pageImage %>">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="/css/style.css?v=1">
+
+  <script type="application/ld+json"><%- JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }).replace(/</g, '\\u003c') %></script>
+</head>
+<body id="top">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <%- include('navbar') %>
+  <main id="main">
+    <%- include('flash') %>

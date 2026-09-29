@@ -1,0 +1,45 @@
+<%- include('../partials/head') %>
+<div class="container section">
+  <%- include('../partials/panel-nav') %>
+  <div class="panel-head"><h1>Users <span class="muted">(<%= total %>)</span></h1></div>
+
+  <form class="toolbar filter-form" method="get" action="/admin/users">
+    <label class="sr-only" for="uq">Search users</label>
+    <input id="uq" type="search" name="q" value="<%= filters.q %>" placeholder="Name or email">
+    <label class="sr-only" for="urole">Role</label>
+    <select id="urole" name="role" data-autosubmit>
+      <option value="">All roles</option>
+      <% ['customer', 'seller', 'admin'].forEach((r) => { %><option value="<%= r %>" <%= filters.role === r ? 'selected' : '' %>><%= r %></option><% }) %>
+    </select>
+    <button class="btn btn-dark btn-sm" type="submit">Filter</button>
+    <a class="btn btn-ghost btn-sm" href="/admin/users">Clear</a>
+  </form>
+
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Joined</th><th>Last sign-in</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        <% items.forEach((u) => { %>
+          <tr>
+            <td><strong><%= u.name %></strong><% if (u.phone) { %><br><span class="muted"><%= u.phone %></span><% } %></td>
+            <td><%= u.email %></td>
+            <td><span class="role-tag"><%= u.role %></span></td>
+            <td><%= h.dateShort(u.created_at) %></td>
+            <td><%= u.last_login_at ? h.dateShort(u.last_login_at) : 'Never' %></td>
+            <td><span class="status-pill <%= u.is_active ? 'is-good' : 'is-bad' %>"><%= u.is_active ? 'Active' : 'Deactivated' %></span></td>
+            <td>
+              <% if (u.role !== 'admin') { %>
+                <form class="inline-form" method="post" action="/admin/users/<%= u.id %>/toggle" data-confirm="<%= u.is_active ? 'Deactivate' : 'Reactivate' %> this account?">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                  <button class="btn btn-ghost btn-sm" type="submit"><%= u.is_active ? 'Deactivate' : 'Reactivate' %></button>
+                </form>
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <%- include('../partials/pagination') %>
+</div>
+<%- include('../partials/footer') %>

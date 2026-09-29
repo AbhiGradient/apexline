@@ -1,0 +1,44 @@
+<%- include('../partials/head') %>
+<section class="auth-wrap">
+  <div class="auth-card">
+    <h1>Create account</h1>
+    <p class="muted">Track orders, save addresses and get part recommendations.</p>
+
+    <% if (errors.length) { %>
+      <ul class="form-errors" role="alert"><% errors.forEach((e) => { %><li><%= e %></li><% }) %></ul>
+    <% } %>
+
+    <form method="post" action="/register">
+      <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+      <input type="hidden" name="next" value="<%= nextUrl %>">
+      <div class="field">
+        <label for="name">Full name</label>
+        <input id="name" type="text" name="name" value="<%= values.name %>" required maxlength="80" autocomplete="name">
+      </div>
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" type="email" name="email" value="<%= values.email %>" required autocomplete="email">
+      </div>
+      <div class="field">
+        <label for="phone">Mobile number (optional)</label>
+        <input id="phone" type="tel" name="phone" value="<%= values.phone %>" inputmode="numeric" autocomplete="tel">
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" type="password" name="password" required minlength="8" autocomplete="new-password">
+        <p class="field-hint">At least 8 characters with a letter and a number.</p>
+      </div>
+      <div class="field">
+        <label for="confirm">Confirm password</label>
+        <input id="confirm" type="password" name="confirm" required minlength="8" autocomplete="new-password">
+      </div>
+      <button class="btn btn-primary btn-block" type="submit">Create account</button>
+    </form>
+
+    <div class="auth-links">
+      <span>Already have an account?</span>
+      <a href="/login?as=customer<%= nextUrl ? `&next=${encodeURIComponent(nextUrl)}` : '' %>">Sign in</a>
+    </div>
+  </div>
+</section>
+<%- include('../partials/footer') %>
