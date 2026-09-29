@@ -1,0 +1,33 @@
+<%- include('../partials/head') %>
+<div class="container section">
+  <%- include('../partials/breadcrumbs', { crumbs: breadcrumbs }) %>
+  <header class="listing-head">
+    <h1>Contact Us</h1>
+    <p>Ask about fitment, an order, or becoming a seller. We reply by email.</p>
+  </header>
+
+  <div class="contact-grid">
+    <form class="card" method="post" action="/contact">
+      <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+      <div class="honeypot" aria-hidden="true"><label>Website<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+      <% if (errors.length) { %><ul class="form-errors" role="alert"><% errors.forEach((e) => { %><li><%= e %></li><% }) %></ul><% } %>
+      <div class="form-grid">
+        <div class="field"><label for="c-name">Your name</label><input id="c-name" type="text" name="name" value="<%= values.name %>" required maxlength="120" autocomplete="name"></div>
+        <div class="field"><label for="c-email">Email</label><input id="c-email" type="email" name="email" value="<%= values.email %>" required autocomplete="email"></div>
+      </div>
+      <div class="field"><label for="c-subject">Subject</label><input id="c-subject" type="text" name="subject" value="<%= values.subject %>" maxlength="160" placeholder="Fitment question, order help, seller application"></div>
+      <div class="field"><label for="c-message">Message</label><textarea id="c-message" name="message" required maxlength="3000" style="min-height:160px"><%= values.message %></textarea></div>
+      <button class="btn btn-primary" type="submit">Send message</button>
+    </form>
+
+    <aside class="card">
+      <h2>Talk to us</h2>
+      <p><%- include('../partials/icon', { name: 'phone' }) %> <a href="tel:<%= site.contact.phone.replace(/[^+\d]/g, '') %>"><%= site.contact.phone %></a></p>
+      <p><%- include('../partials/icon', { name: 'mail' }) %> <a href="mailto:<%= site.contact.email %>"><%= site.contact.email %></a></p>
+      <p><%- include('../partials/icon', { name: 'pin' }) %> <%= site.contact.city %>, <%= site.contact.region %>, India</p>
+      <p class="muted">Have your car model and order number ready and we can help faster.</p>
+      <p><a href="/faq">Read the FAQs</a> &middot; <a href="/support">Help Centre</a></p>
+    </aside>
+  </div>
+</div>
+<%- include('../partials/footer') %>

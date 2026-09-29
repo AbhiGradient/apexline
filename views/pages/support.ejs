@@ -1,0 +1,19 @@
+<%- include('../partials/head') %>
+<div class="container section">
+  <%- include('../partials/breadcrumbs', { crumbs: breadcrumbs }) %>
+  <header class="listing-head">
+    <h1>Help Centre</h1>
+    <p>Pick a topic below, or call us on <a href="tel:<%= site.contact.phone.replace(/[^+\d]/g, '') %>"><strong><%= site.contact.phone %></strong></a> for fitment advice.</p>
+  </header>
+  <div class="card-grid">
+    <a class="card" href="/account/orders"><h3>Track an order</h3><p class="muted">See where your parcel is, cancel an order or leave a review.</p></a>
+    <a class="card" href="/faq"><h3>FAQs</h3><p class="muted">Fitment, warranty, legality, payments and more.</p></a>
+    <a class="card" href="/shipping-policy"><h3>Shipping</h3><p class="muted">Delivery times, charges and damaged parcels.</p></a>
+    <a class="card" href="/return-policy"><h3>Returns and refunds</h3><p class="muted"><%= site.returnDays %>-day returns and a <%= site.warrantyMonths %>-month warranty.</p></a>
+    <a class="card" href="/vehicles"><h3>Find parts for your car</h3><p class="muted">Pick your model and see matched upgrades.</p></a>
+    <a class="card" href="/guides"><h3>Buying guides</h3><p class="muted">Plain-English advice on choosing the right parts.</p></a>
+    <a class="card" href="/contact"><h3>Contact us</h3><p class="muted">Send a message and we will reply by email.</p></a>
+    <a class="card" href="/login?as=seller"><h3>Sell on <%= site.shortName %></h3><p class="muted">Sellers manage products and orders from their dashboard.</p></a>
+  </div>
+</div>
+<%- include('../partials/footer') %>

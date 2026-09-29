@@ -1,3 +1,4 @@
+const guideList = require('../config/guides');
 const Product = require('../models/product');
 const Catalog = require('../models/catalog');
 const site = require('../config/site');
@@ -155,7 +156,8 @@ const home = wrap(async (req, res) => {
     hero: featured[0] || bestsellers[0] || null,
     vehicles,
     brands,
-    faqs
+    faqs,
+    guides: guideList.slice(0, 3)
   });
 });
 

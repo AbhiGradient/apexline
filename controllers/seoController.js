@@ -1,3 +1,4 @@
+const guides = require('../config/guides');
 const fs = require('fs');
 const path = require('path');
 const site = require('../config/site');
@@ -5,7 +6,7 @@ const Catalog = require('../models/catalog');
 const h = require('../utils/format');
 
 const STATIC_PATHS = [
-  '/shop', '/deals', '/brands', '/vehicles', '/support', '/faq', '/about', '/contact',
+  '/shop','/guides', '/deals', '/brands', '/vehicles', '/support', '/faq', '/about', '/contact',
   '/shipping-policy', '/return-policy', '/privacy-policy', '/terms', '/sitemap'
 ];
 
@@ -47,6 +48,7 @@ const buildXml = async () => {
     ...categories.map((c) => entry(`/category/${c.slug}`, { freq: 'daily', priority: '0.8' })),
     ...brands.map((b) => entry(`/brand/${b.slug}`, { priority: '0.6' })),
     ...vehicles.map((v) => entry(`/vehicle/${v.slug}`, { priority: '0.6' })),
+    ...guides.map((g) => entry(`/guides/${g.slug}`, { lastmod: g.updated, priority: '0.6' })),
     ...products.map((p) =>
       entry(`/product/${p.slug}`, { lastmod: p.updated_at, priority: '0.7', image: sitemapImage(p.image), title: p.name })
     )
@@ -111,7 +113,7 @@ const sitemapHtml = async (req, res, next) => {
         ['Shop All', '/shop'], ['Deals', '/deals'], ['Brands', '/brands'], ['Shop by Vehicle', '/vehicles'],
         ['Support', '/support'], ['FAQs', '/faq'], ['About Us', '/about'], ['Contact', '/contact'],
         ['Shipping Policy', '/shipping-policy'], ['Returns and Refunds', '/return-policy'],
-        ['Privacy Policy', '/privacy-policy'], ['Terms and Conditions', '/terms']
+        ['Privacy Policy', '/privacy-policy'], ['Terms and Conditions', '/terms'], ['Buying Guides', '/guides']
       ],
       breadcrumbs: [{ name: 'Home', url: '/' }, { name: 'Sitemap', url: '/sitemap' }]
     });

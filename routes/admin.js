@@ -1,3 +1,4 @@
+const inbox = require('../controllers/inboxController');
 const router = require('express').Router();
 const admin = require('../controllers/adminController');
 const crud = require('../controllers/crudController');
@@ -26,5 +27,11 @@ router.get(entity, crud.list);
 router.post(entity, crud.create);
 router.post(`${entity}/:id`, crud.update);
 router.post(`${entity}/:id/delete`, crud.remove);
+
+router.get('/admin/messages', inbox.messages);
+router.post('/admin/messages/:id/read', inbox.toggleRead);
+router.post('/admin/messages/:id/delete', inbox.removeMessage);
+router.get('/admin/subscribers', inbox.subscribers);
+router.post('/admin/subscribers/:id/delete', inbox.removeSubscriber);
 
 module.exports = router;

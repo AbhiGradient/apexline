@@ -50,6 +50,7 @@ const graph = [
   <meta name="description" content="<%= pageDesc %>">
   <% if (s.keywords) { %><meta name="keywords" content="<%= s.keywords %>"><% } %>
   <meta name="robots" content="<%= robots %>">
+  <% if (site.googleVerification) { %><meta name="google-site-verification" content="<%= site.googleVerification %>"><% } %>
   <meta name="author" content="<%= site.name %>">
   <meta name="theme-color" content="<%= site.themeColor %>">
   <meta name="geo.region" content="IN-MH">

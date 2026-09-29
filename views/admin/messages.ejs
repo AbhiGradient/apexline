@@ -1,0 +1,40 @@
+<%- include('../partials/head') %>
+<div class="container section">
+  <%- include('../partials/panel-nav') %>
+  <div class="panel-head"><h1>Messages <span class="muted">(<%= total %>)</span></h1></div>
+
+  <nav class="tabs-bar" aria-label="Message filter">
+    <a href="/admin/messages" class="<%= filter === 'all' ? 'is-active' : '' %>">All</a>
+    <a href="/admin/messages?filter=unread" class="<%= filter === 'unread' ? 'is-active' : '' %>">Unread</a>
+  </nav>
+
+  <% if (!items.length) { %>
+    <div class="empty-state"><h2>No messages</h2><p class="muted">Contact form messages appear here.</p></div>
+  <% } else { %>
+    <% items.forEach((m) => { %>
+      <details class="msg-card<%= m.is_read ? '' : ' is-unread' %>">
+        <summary>
+          <span><strong><%= m.name %></strong> &middot; <%= m.subject || 'No subject' %></span>
+          <span class="muted"><%= h.dateShort(m.created_at) %></span>
+        </summary>
+        <div class="msg-body">
+          <p class="muted"><a href="mailto:<%= m.email %>?subject=<%= encodeURIComponent(`Re: ${m.subject || 'Your message to ' + site.name}`) %>"><%= m.email %></a></p>
+          <p><%= m.message %></p>
+          <div class="btn-row">
+            <a class="btn btn-primary btn-sm" href="mailto:<%= m.email %>?subject=<%= encodeURIComponent(`Re: ${m.subject || 'Your message to ' + site.name}`) %>">Reply by email</a>
+            <form class="inline-form" method="post" action="/admin/messages/<%= m.id %>/read">
+              <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+              <button class="btn btn-ghost btn-sm" type="submit">Mark <%= m.is_read ? 'unread' : 'read' %></button>
+            </form>
+            <form class="inline-form" method="post" action="/admin/messages/<%= m.id %>/delete" data-confirm="Delete this message?">
+              <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+              <button class="btn btn-ghost btn-sm" type="submit">Delete</button>
+            </form>
+          </div>
+        </div>
+      </details>
+    <% }) %>
+    <%- include('../partials/pagination') %>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

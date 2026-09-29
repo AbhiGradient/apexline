@@ -1,0 +1,43 @@
+<%- include('../partials/head') %>
+<div class="container section">
+  <%- include('../partials/breadcrumbs', { crumbs: breadcrumbs }) %>
+  <article class="prose">
+    <h1><%= g.title %></h1>
+    <p class="guide-meta">Updated <%= h.dateShort(g.updated) %> &middot; <%= g.readMins %> min read</p>
+    <p class="lead"><%= g.intro %></p>
+    <% g.sections.forEach((s) => { %>
+      <section>
+        <h2><%= s.h %></h2>
+        <% (s.p || []).forEach((t) => { %><p><%= t %></p><% }) %>
+        <% if (s.list) { %>
+          <% if (s.ordered) { %><ol><% s.list.forEach((li) => { %><li><%= li %></li><% }) %></ol>
+          <% } else { %><ul><% s.list.forEach((li) => { %><li><%= li %></li><% }) %></ul><% } %>
+        <% } %>
+      </section>
+    <% }) %>
+
+    <h2>Related</h2>
+    <ul>
+      <% g.links.forEach((l) => { %><li><a href="<%= l.url %>"><%= l.label %></a></li><% }) %>
+    </ul>
+  </article>
+
+  <% if (products.length) { %>
+    <section class="pdp-section" aria-labelledby="gp-title">
+      <h2 id="gp-title">Shop the parts mentioned</h2>
+      <div class="grid-products">
+        <% products.forEach((p) => { %><%- include('../partials/product-card', { p }) %><% }) %>
+      </div>
+    </section>
+  <% } %>
+
+  <section class="pdp-section" aria-labelledby="og-title">
+    <h2 id="og-title">More guides</h2>
+    <div class="card-grid">
+      <% others.forEach((o) => { %>
+        <a class="card" href="/guides/<%= o.slug %>"><h3><%= o.title %></h3><p class="muted"><%= o.description %></p></a>
+      <% }) %>
+    </div>
+  </section>
+</div>
+<%- include('../partials/footer') %>

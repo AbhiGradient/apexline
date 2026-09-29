@@ -1,0 +1,31 @@
+<%- include('../partials/head') %>
+<div class="container section">
+  <%- include('../partials/panel-nav') %>
+  <div class="panel-head"><h1>Newsletter subscribers <span class="muted">(<%= total %>)</span></h1></div>
+
+  <% if (!items.length) { %>
+    <div class="empty-state"><h2>No subscribers yet</h2><p class="muted">Sign-ups from the footer form appear here.</p></div>
+  <% } else { %>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>Email</th><th>Subscribed</th><th></th></tr></thead>
+        <tbody>
+          <% items.forEach((s) => { %>
+            <tr>
+              <td><%= s.email %></td>
+              <td><%= h.dateShort(s.created_at) %></td>
+              <td>
+                <form class="inline-form" method="post" action="/admin/subscribers/<%= s.id %>/delete" data-confirm="Remove this subscriber?">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+                  <button class="btn btn-ghost btn-sm" type="submit">Remove</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <%- include('../partials/pagination') %>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

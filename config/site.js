@@ -21,6 +21,7 @@ module.exports = {
   pageSize: 12,
   returnDays: 7,
   warrantyMonths: 12,
+  googleVerification: process.env.GOOGLE_SITE_VERIFICATION || '',
   themeColor: '#0b0b0c',
   socials: {
     facebook: 'https://www.facebook.com/share/1D6xXfp61p/',

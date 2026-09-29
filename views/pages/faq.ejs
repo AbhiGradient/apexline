@@ -1,0 +1,13 @@
+<%- include('../partials/head') %>
+<div class="container section prose">
+  <%- include('../partials/breadcrumbs', { crumbs: breadcrumbs }) %>
+  <h1>Frequently Asked Questions</h1>
+  <p class="lead">Straight answers about fitting, buying and looking after performance parts.</p>
+  <div class="faq">
+    <% faqs.forEach((f) => { %>
+      <details><summary><%= f.q %></summary><p><%= f.a %></p></details>
+    <% }) %>
+  </div>
+  <p>Still stuck? <a href="/contact">Send us a message</a> or call <a href="tel:<%= site.contact.phone.replace(/[^+\d]/g, '') %>"><%= site.contact.phone %></a>.</p>
+</div>
+<%- include('../partials/footer') %>

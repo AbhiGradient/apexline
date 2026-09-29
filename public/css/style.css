@@ -449,3 +449,21 @@ a.card h3 { margin-bottom: 4px; }
   .item-card { grid-template-columns: 56px 1fr; }
   .item-card > :last-child { grid-column: 1 / -1; }
 }
+
+.prose { max-width: 860px; }
+.prose h2 { margin-top: 30px; font-size: 1.6rem; }
+.prose ul, .prose ol { margin: 0 0 1em 1.3em; }
+.prose ul { list-style: disc; }
+.prose ol { list-style: decimal; }
+.prose li { margin-bottom: 6px; }
+.lead { color: #3b3a36; font-size: 1.15rem; }
+.guide-meta { color: var(--muted); font-size: 0.9rem; }
+.honeypot { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.contact-grid { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+.msg-card { border: 1px solid var(--line); border-radius: var(--radius); background: #fff; }
+.msg-card + .msg-card { margin-top: 12px; }
+.msg-card.is-unread { border-left: 6px solid var(--accent); }
+.msg-card summary { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; padding: 14px 18px; cursor: pointer; }
+.msg-body { padding: 0 18px 16px; }
+.msg-body p { white-space: pre-wrap; }
+@media (max-width: 960px) { .contact-grid { grid-template-columns: 1fr; } }

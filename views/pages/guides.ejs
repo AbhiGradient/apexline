@@ -1,0 +1,18 @@
+<%- include('../partials/head') %>
+<div class="container section">
+  <%- include('../partials/breadcrumbs', { crumbs: breadcrumbs }) %>
+  <header class="listing-head">
+    <h1>Buying Guides</h1>
+    <p>Plain-English advice for choosing air filters, intakes, exhausts and suspension, written for Indian car owners.</p>
+  </header>
+  <div class="card-grid">
+    <% guides.forEach((g) => { %>
+      <a class="card" href="/guides/<%= g.slug %>">
+        <h3><%= g.title %></h3>
+        <p class="muted"><%= g.description %></p>
+        <strong><%= g.readMins %> min read</strong>
+      </a>
+    <% }) %>
+  </div>
+</div>
+<%- include('../partials/footer') %>

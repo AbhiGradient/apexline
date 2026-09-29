@@ -103,6 +103,15 @@
   </div>
 </section>
 
+<section class="section container" aria-labelledby="guide-title">
+  <div class="section-head"><h2 id="guide-title">Buying Guides</h2><a href="/guides">All guides</a></div>
+  <div class="card-grid">
+    <% guides.forEach((g) => { %>
+      <a class="card" href="/guides/<%= g.slug %>"><h3><%= g.title %></h3><p class="muted"><%= g.description %></p><strong><%= g.readMins %> min read</strong></a>
+    <% }) %>
+  </div>
+</section>
+
 <section class="section container" aria-labelledby="about-title">
   <div class="section-head"><h2 id="about-title">Performance Car Parts, Explained Honestly</h2></div>
   <div class="seo-copy">

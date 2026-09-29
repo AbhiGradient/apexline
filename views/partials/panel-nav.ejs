@@ -2,7 +2,17 @@
 const isAdminUser = user.role === 'admin';
 const root = isAdminUser ? '/admin' : '/seller';
 const tabs = isAdminUser
-  ? [['Dashboard', '/admin'], ['Products', '/admin/products'], ['Orders', '/admin/orders'], ['Users', '/admin/users'], ['Sellers', '/admin/sellers'], ['Categories', '/admin/categories'], ['Brands', '/admin/brands'], ['Vehicles', '/admin/vehicles'], ['Coupons', '/admin/coupons']]
+  ? [
+  ['Dashboard', '/admin'],
+  ['Products', '/admin/products'],
+  ['Orders', '/admin/orders'],
+  ['Users', '/admin/users'],
+  ['Sellers', '/admin/sellers'],
+  ['Categories', '/admin/categories'],
+  ['Coupons', '/admin/coupons'],
+  ['Messages', '/admin/messages'],
+  ['Subscribers', '/admin/subscribers']
+]
   : [['Dashboard', '/seller'], ['Products', '/seller/products'], ['Orders', '/seller/orders']];
 const isOn = (href) => (href === root ? currentPath === root : currentPath === href || currentPath.startsWith(`${href}/`));
 %>
