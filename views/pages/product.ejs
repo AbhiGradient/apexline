@@ -5,6 +5,9 @@ const off = h.discountPct(product.price, product.compare_price);
 const inStock = Number(product.stock) > 0;
 const maxQty = Math.max(1, Math.min(Number(product.stock), 10));
 const freeShip = Number(product.price) >= site.shipping.freeAbove;
+const rated = Number(product.rating_count) > 0;
+const highlights = specs.slice(0, 5);
+const phone = site.contact.phone.replace(/[^+\d]/g, '');
 %>
 <div class="container">
   <%- include('../partials/breadcrumbs', { crumbs: breadcrumbs }) %>
@@ -26,36 +29,50 @@ const freeShip = Number(product.price) >= site.shipping.freeAbove;
     </div>
 
     <div class="pdp-info">
-      <% if (product.brand_name) { %><p class="product-brand"><a href="/brand/<%= product.brand_slug %>"><%= product.brand_name %></a></p><% } %>
+      <% if (product.brand_name) { %><p class="product-brand">Brand: <a href="/brand/<%= product.brand_slug %>"><%= product.brand_name %></a></p><% } %>
       <h1><%= product.name %></h1>
-      <% if (Number(product.rating_count) > 0) { %>
+      <% if (rated) { %>
         <p class="rating">
-          <span class="stars" style="--rating:<%= product.rating_avg %>" aria-hidden="true"></span>
           <strong><%= Number(product.rating_avg).toFixed(1) %></strong>
-          <a href="#reviews" class="rating-count">(<%= product.rating_count %> reviews)</a>
+          <span class="stars" style="--rating:<%= product.rating_avg %>" aria-hidden="true"></span>
+          <a href="#reviews" class="rating-count"><%= product.rating_count %> rating<%= Number(product.rating_count) === 1 ? '' : 's' %></a>
         </p>
       <% } %>
+      <p class="muted"><%= product.sold_count > 0 ? `${product.sold_count}+ bought so far` : 'New arrival' %></p>
+
       <p class="price-row">
+        <% if (off) { %><span class="badge badge-sale">-<%= off %>%</span><% } %>
         <span class="pdp-price"><%= h.money(product.price) %></span>
-        <% if (off) { %><s class="price-old">MRP <%= h.money(product.compare_price) %></s><span class="badge badge-sale"><%= off %>% off</span><% } %>
       </p>
-      <p class="muted">Inclusive of <%= site.gstRate %>% GST</p>
+      <% if (off) { %><p class="muted" style="margin-top:-6px">M.R.P.: <s><%= h.money(product.compare_price) %></s> &middot; You save <%= h.money(Number(product.compare_price) - Number(product.price)) %></p><% } %>
+      <p class="muted">Inclusive of all taxes (<%= site.gstRate %>% GST)</p>
+
+      <h2 class="cart-title" style="margin-top:18px"><strong>About this item</strong></h2>
       <p><%= product.short_description %></p>
+      <% if (highlights.length) { %>
+        <ul class="bullets">
+          <% highlights.forEach((s) => { %><li><strong><%= s.spec_key %>:</strong> <%= s.spec_value %></li><% }) %>
+        </ul>
+      <% } %>
+
       <ul class="feature-list">
-        <li><%- include('../partials/icon', { name: 'shield' }) %> <%= site.warrantyMonths %>-month manufacturer warranty</li>
+        <li><%- include('../partials/icon', { name: 'shield' }) %> <%= site.warrantyMonths %>-month warranty</li>
         <li><%- include('../partials/icon', { name: 'return' }) %> <%= site.returnDays %>-day returns on unused parts</li>
-        <li><%- include('../partials/icon', { name: 'truck' }) %> <%= freeShip ? 'Free delivery' : `Delivery ${h.money(site.shipping.flatFee)}, free above ${h.money(site.shipping.freeAbove)}` %></li>
-        <li><%- include('../partials/icon', { name: 'wrench' }) %> Fitment help: <a href="tel:<%= site.contact.phone.replace(/[^+\d]/g, '') %>"><%= site.contact.phone %></a></li>
+        <li><%- include('../partials/icon', { name: 'wrench' }) %> Fitment help: <a href="tel:<%= phone %>"><%= site.contact.phone %></a></li>
       </ul>
       <p class="muted">SKU: <%= product.sku %> &middot; Category: <a href="/category/<%= product.category_slug %>"><%= product.category_name %></a></p>
     </div>
 
     <aside class="buybox" aria-label="Purchase options">
       <p class="pdp-price"><%= h.money(product.price) %></p>
-      <p class="<%= inStock ? (product.stock <= 5 ? 'text-warn' : 'text-ok') : 'text-bad' %>">
-        <%= inStock ? (product.stock <= 5 ? `Only ${product.stock} left in stock` : 'In stock') : 'Currently out of stock' %>
+      <p class="delivery">
+        <% if (freeShip) { %><strong class="text-ok">FREE delivery</strong><% } else { %><strong><%= h.money(site.shipping.flatFee) %> delivery</strong> <span class="muted">(free above <%= h.money(site.shipping.freeAbove) %>)</span><% } %>
+        <br>Arrives <strong><%= eta.from %> to <%= eta.to %></strong>
       </p>
-      <p class="muted">Sold by <strong><%= product.store_name %></strong><br>Delivery in 3 to 7 business days</p>
+      <p class="<%= inStock ? (product.stock <= 5 ? 'text-warn' : 'text-ok') : 'text-bad' %>" style="font-size:1.15rem">
+        <%= inStock ? (product.stock <= 5 ? `Only ${product.stock} left in stock` : 'In stock') : 'Currently unavailable' %>
+      </p>
+      <p class="muted">Sold by <strong><%= product.store_name %></strong><br>Secure checkout &middot; GST invoice included</p>
 
       <% if (shopper) { %>
         <form action="/cart/add" method="post" data-ajax-form>
@@ -75,8 +92,9 @@ const freeShip = Number(product.price) >= site.shipping.freeAbove;
         </form>
         <form action="/wishlist/toggle" method="post" class="wish-form<%= product.wished ? ' is-active' : '' %>" data-ajax-form style="position:static">
           <input type="hidden" name="product_id" value="<%= product.id %>">
-          <button class="btn btn-ghost btn-block" type="submit"><%- include('../partials/icon', { name: 'heart' }) %> Save to Wishlist</button>
+          <button class="btn btn-ghost btn-block" type="submit"><%- include('../partials/icon', { name: 'heart' }) %> Add to Wishlist</button>
         </form>
+        <% if (!user) { %><p class="field-hint" style="margin-top:10px">You can browse and add to cart freely. Sign-in is asked only when you check out.</p><% } %>
       <% } else { %>
         <p class="muted">You are signed in as <strong><%= user.role %></strong>. Shopping is available on customer accounts.</p>
         <a class="btn btn-dark btn-block" href="<%= user.role === 'admin' ? '/admin/products' : '/seller/products' %>">Manage Products</a>
@@ -84,23 +102,32 @@ const freeShip = Number(product.price) >= site.shipping.freeAbove;
     </aside>
   </article>
 
-  <section class="pdp-section" aria-labelledby="desc-title">
-    <h2 id="desc-title">About This Part</h2>
+  <nav class="pdp-nav" aria-label="Product sections">
+    <a href="#overview">Overview</a>
+    <% if (specs.length) { %><a href="#specs">Specifications</a><% } %>
+    <a href="#fitment">Fitment</a>
+    <a href="#reviews">Reviews<% if (rated) { %> (<%= product.rating_count %>)<% } %></a>
+    <% if (related.length) { %><a href="#related">Related</a><% } %>
+  </nav>
+
+  <section class="pdp-section" id="overview" aria-labelledby="desc-title">
+    <h2 id="desc-title">Product Description</h2>
     <p><%= product.description %></p>
   </section>
 
   <% if (specs.length) { %>
-    <section class="pdp-section" aria-labelledby="spec-title">
-      <h2 id="spec-title">Specifications</h2>
+    <section class="pdp-section" id="specs" aria-labelledby="spec-title">
+      <h2 id="spec-title">Technical Specifications</h2>
       <table class="spec-table">
         <tbody>
           <% specs.forEach((s) => { %><tr><th scope="row"><%= s.spec_key %></th><td><%= s.spec_value %></td></tr><% }) %>
+          <tr><th scope="row">SKU</th><td><%= product.sku %></td></tr>
         </tbody>
       </table>
     </section>
   <% } %>
 
-  <section class="pdp-section" aria-labelledby="fit-title">
+  <section class="pdp-section" id="fitment" aria-labelledby="fit-title">
     <h2 id="fit-title">Fitment</h2>
     <% if (fitment.length) { %>
       <p class="muted">Confirmed to fit these vehicles:</p>
@@ -108,40 +135,57 @@ const freeShip = Number(product.price) >= site.shipping.freeAbove;
         <% fitment.forEach((v) => { %><a class="chip" href="/vehicle/<%= v.slug %>"><%= v.make %> <%= v.model %> (<%= v.year_from %>+)</a><% }) %>
       </div>
     <% } else { %>
-      <p>This is a universal part. Confirm dimensions and connections against your car, or call <a href="tel:<%= site.contact.phone.replace(/[^+\d]/g, '') %>"><%= site.contact.phone %></a> for fitment advice.</p>
+      <p>This is a universal part. Confirm dimensions and connections against your car, or call <a href="tel:<%= phone %>"><%= site.contact.phone %></a> for fitment advice.</p>
     <% } %>
   </section>
 
   <section class="pdp-section" id="reviews" aria-labelledby="rev-title">
     <h2 id="rev-title">Customer Reviews</h2>
-    <% if (reviews.length) { %>
-      <% reviews.forEach((r) => { %>
-        <div class="review">
-          <p class="rating"><span class="stars" style="--rating:<%= r.rating %>" aria-hidden="true"></span> <strong><%= r.title || `${r.rating} out of 5` %></strong></p>
-          <p><%= r.body %></p>
-          <p class="muted"><%= r.name %> &middot; <%= h.dateShort(r.created_at) %></p>
+    <% if (rated) { %>
+      <div class="review-summary">
+        <div>
+          <p class="big-rating"><%= Number(product.rating_avg).toFixed(1) %> <small class="muted">/ 5</small></p>
+          <p class="rating"><span class="stars" style="--rating:<%= product.rating_avg %>" aria-hidden="true"></span></p>
+          <p class="muted"><%= product.rating_count %> global rating<%= Number(product.rating_count) === 1 ? '' : 's' %></p>
         </div>
-      <% }) %>
+        <div>
+          <% breakdown.forEach((b) => { %>
+            <div class="bar-row"><span><%= b.star %> star</span><div class="bar"><span style="width:<%= b.pct %>%"></span></div><span><%= b.pct %>%</span></div>
+          <% }) %>
+        </div>
+      </div>
+      <div style="margin-top:18px">
+        <% reviews.forEach((r) => { %>
+          <div class="review">
+            <p class="rating"><span class="stars" style="--rating:<%= r.rating %>" aria-hidden="true"></span> <strong><%= r.title || `${r.rating} out of 5` %></strong></p>
+            <p><%= r.body %></p>
+            <p class="muted"><%= r.name %> &middot; <span class="text-ok">Verified purchase</span> &middot; <%= h.dateShort(r.created_at) %></p>
+          </div>
+        <% }) %>
+      </div>
     <% } else { %>
-      <p class="muted">No reviews yet. Purchased this part? Reviews open from your order history.</p>
+      <p class="muted">No reviews yet. Bought this part? Once it is delivered, you can review it from <a href="/account/orders">Your Orders</a>.</p>
     <% } %>
   </section>
 
   <% if (related.length) { %>
-    <section class="pdp-section" aria-labelledby="rel-title">
+    <section class="pdp-section" id="related" aria-labelledby="rel-title">
       <h2 id="rel-title">Customers Also Viewed</h2>
-      <div class="grid-products">
-        <% related.forEach((p) => { %><%- include('../partials/product-card', { p }) %><% }) %>
-      </div>
+      <div class="grid-products"><% related.forEach((p) => { %><%- include('../partials/product-card', { p }) %><% }) %></div>
+    </section>
+  <% } %>
+
+  <% if (moreFromBrand.length) { %>
+    <section class="pdp-section" aria-labelledby="mb-title">
+      <h2 id="mb-title">More from <%= product.brand_name %></h2>
+      <div class="grid-products"><% moreFromBrand.forEach((p) => { %><%- include('../partials/product-card', { p }) %><% }) %></div>
     </section>
   <% } %>
 
   <% if (viewed.length) { %>
     <section class="pdp-section" aria-labelledby="rv-title">
       <h2 id="rv-title">Your Recently Viewed</h2>
-      <div class="grid-products">
-        <% viewed.forEach((p) => { %><%- include('../partials/product-card', { p }) %><% }) %>
-      </div>
+      <div class="grid-products"><% viewed.forEach((p) => { %><%- include('../partials/product-card', { p }) %><% }) %></div>
     </section>
   <% } %>
 </div>

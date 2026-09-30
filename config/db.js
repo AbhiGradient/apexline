@@ -1,9 +1,11 @@
 require('dotenv').config();
 const mysql = require('mysql2/promise');
 
+const ca = process.env.DB_CA ? process.env.DB_CA.replace(/\\n/g, '\n') : undefined;
+
 const ssl =
   process.env.DB_SSL === 'true'
-    ? { minVersion: 'TLSv1.2', rejectUnauthorized: process.env.DB_SSL_STRICT !== 'false' }
+    ? { minVersion: 'TLSv1.2', ca, rejectUnauthorized: process.env.DB_SSL_STRICT !== 'false' }
     : undefined;
 
 const baseConfig = {
@@ -12,6 +14,7 @@ const baseConfig = {
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_NAME || 'apexline',
+  connectTimeout: 20000,
   ssl
 };
 
@@ -22,7 +25,8 @@ const pool = mysql.createPool({
   queueLimit: 0,
   charset: 'utf8mb4',
   decimalNumbers: true,
-  enableKeepAlive: true
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 10000
 });
 
 const query = async (sql, params = []) => {

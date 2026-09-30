@@ -6,7 +6,7 @@ module.exports = {
   tagline: 'Performance parts engineered for the street and the track',
   description:
     'Shop performance car parts online: air filters, cold air intakes, exhausts, ECU tuners, coilovers, brakes, wheels and more, with fitment support for popular Indian cars.',
-  url: (process.env.SITE_URL || 'http://localhost:3000').replace(/\/$/, ''),
+    url: (process.env.SITE_URL || process.env.RENDER_EXTERNAL_URL || 'http://localhost:3000').replace(/\/$/, ''),
   locale: 'en_IN',
   currency: { code: 'INR', symbol: '₹', locale: 'en-IN' },
   contact: {

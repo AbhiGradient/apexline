@@ -1,0 +1,49 @@
+services:
+  - type: web
+    name: apexline-motorworks
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: DB_SSL
+        value: "true"
+      - key: DB_SSL_STRICT
+        value: "false"
+      - key: DB_POOL_LIMIT
+        value: "5"
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_NAME
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: SELLER_EMAIL
+        sync: false
+      - key: SELLER_PASSWORD
+        sync: false
+      - key: MAIL_PROVIDER
+        sync: false
+      - key: MAIL_API_KEY
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      - key: SITE_URL
+        sync: false
+      - key: GOOGLE_SITE_VERIFICATION
+        sync: false

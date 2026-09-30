@@ -48,6 +48,16 @@ app.use(
 
 app.get('/healthz', (req, res) => res.type('text').send('ok'));
 
+app.get('/ping', async (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  try {
+    await pool.query('SELECT 1');
+    res.type('text').send('pong');
+  } catch (err) {
+    res.status(503).type('text').send('database unavailable');
+  }
+});
+
 app.use(rateLimit({ windowMs: 60 * 1000, limit: 300, standardHeaders: true, legacyHeaders: false }));
 app.use(express.urlencoded({ extended: true, limit: '100kb' }));
 app.use(express.json({ limit: '100kb' }));
@@ -90,7 +100,7 @@ app.use((req, res) => {
 
 app.use((err, req, res, next) => {
   const status = err.status || 500;
-  if (status >= 500) console.error(err);
+ if (status >= 500) console.error(`[${req.method}] ${req.originalUrl}`, err);
   res.status(status);
   renderOrText(
     res,
@@ -112,7 +122,19 @@ const PORT = Number(process.env.PORT) || 3000;
     if (seeded) console.log('Database created and seeded with starter data.');
   } catch (err) {
     console.error('Database setup failed:', err.message);
-    
+    process.exit(1);
   }
-  app.listen(PORT, () => console.log(`${site.name} is live at ${site.url} (port ${PORT})`));
+
+  const server = app.listen(PORT, '0.0.0.0', () => console.log(`${site.name} is live at ${site.url} (port ${PORT})`));
+  server.keepAliveTimeout = 65 * 1000;
+  server.headersTimeout = 66 * 1000;
+
+  const shutdown = () => {
+    server.close(() => pool.end().catch(() => {}).finally(() => process.exit(0)));
+    setTimeout(() => process.exit(0), 10000).unref();
+  };
+  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', shutdown);
 })();
+
+process.on('unhandledRejection', (err) => console.error('Unhandled rejection:', err));

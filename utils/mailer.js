@@ -1,27 +1,57 @@
 const nodemailer = require('nodemailer');
 const site = require('../config/site');
 
-const transporter = process.env.SMTP_HOST
-  ? nodemailer.createTransport({
+const provider = (process.env.MAIL_PROVIDER || (process.env.SMTP_HOST ? 'smtp' : '')).toLowerCase();
+const from = process.env.MAIL_FROM || `${site.name} <no-reply@localhost>`;
+
+const parseFrom = (value) => {
+  const match = value.match(/^\s*(.*?)\s*<([^>]+)>\s*$/);
+  return match ? { name: match[1].replace(/^"|"$/g, ''), email: match[2] } : { name: site.name, email: value.trim() };
+};
+
+const postJson = async (url, headers, body) => {
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...headers },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(10000)
+  });
+  if (!res.ok) throw new Error(`Mail API ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  return res.json().catch(() => ({}));
+};
+
+let smtp = null;
+const smtpTransport = () => {
+  if (!smtp) {
+    smtp = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: Number(process.env.SMTP_PORT) || 587,
       secure: Number(process.env.SMTP_PORT) === 465,
       auth: process.env.SMTP_USER ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS } : undefined
-    })
-  : null;
-
-const send = async ({ to, subject, text, html }) => {
-  if (!transporter) {
-    console.log(`\n[mail:dev] To: ${to}\nSubject: ${subject}\n${text}\n`);
-    return { dev: true };
+    });
   }
-  return transporter.sendMail({
-    from: process.env.MAIL_FROM || `${site.name} <no-reply@localhost>`,
-    to,
-    subject,
-    text,
-    html
-  });
+  return smtp;
+};
+
+const senders = {
+  resend: ({ to, subject, text, html }) =>
+    postJson('https://api.resend.com/emails', { Authorization: `Bearer ${process.env.MAIL_API_KEY}` }, { from, to: [to], subject, text, html }),
+  brevo: ({ to, subject, text, html }) =>
+    postJson(
+      'https://api.brevo.com/v3/smtp/email',
+      { 'api-key': process.env.MAIL_API_KEY },
+      { sender: parseFrom(from), to: [{ email: to }], subject, textContent: text, htmlContent: html }
+    ),
+  smtp: (mail) => smtpTransport().sendMail({ from, ...mail })
+};
+
+const send = async (mail) => {
+  const deliver = senders[provider];
+  if (!deliver) {
+    console.log(`\n[mail:console] To: ${mail.to}\nSubject: ${mail.subject}\n${mail.text}\n`);
+    return { console: true };
+  }
+  return deliver(mail);
 };
 
 const sendPasswordReset = (user, link) =>

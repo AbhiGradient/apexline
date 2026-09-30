@@ -3,13 +3,13 @@
   "version": "1.0.0",
   "description": "Performance car mods e-commerce store built with Node.js, Express, EJS and MySQL",
   "main": "server.js",
+  "engines": {
+    "node": ">=20 <25"
+  },
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
     "db:setup": "node database/bootstrap.js"
-  },
-  "engines": {
-    "node": ">=18"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

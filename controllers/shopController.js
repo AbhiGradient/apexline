@@ -304,30 +304,58 @@ const vehicle = wrap(async (req, res) => {
   });
 });
 
+const dayLabel = (offset) =>
+  new Date(Date.now() + offset * 86400000).toLocaleDateString('en-IN', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short'
+  });
+
 const product = wrap(async (req, res) => {
   const p = await Product.findBySlug(req.params.slug);
   if (!p) throw notFound('This product is no longer available.');
 
   const uid = shopperId(req);
-  const [detail, related, viewed] = await Promise.all([
+  const [detail, related, viewed, brandMore] = await Promise.all([
     Product.details(p.id),
     Product.related(p, 8),
-    uid ? Product.recentlyViewed(uid, 6, p.id) : []
+    uid ? Product.recentlyViewed(uid, 6, p.id) : [],
+    p.brand_slug ? Product.select({ brandSlug: p.brand_slug, sort: 'popular' }, 6) : []
   ]);
-  await Product.markWished([p, ...related, ...viewed], uid);
+
+  const moreFromBrand = brandMore.filter((x) => x.id !== p.id).slice(0, 4);
+
+  await Product.markWished([p, ...related, ...viewed, ...moreFromBrand], uid);
   Product.recordView(p.id, uid).catch(() => {});
 
   const gallery = [
     { src: h.imageUrl(p.image), alt: p.name },
-    ...detail.images.map((i) => ({ src: h.imageUrl(i.image), alt: i.alt || p.name }))
+    ...detail.images.map((i) => ({
+      src: h.imageUrl(i.image),
+      alt: i.alt || p.name
+    }))
   ];
 
-  const parent = p.category_parent_id ? await Catalog.categoryParentById(p.category_parent_id) : null;
   const breadcrumbs = [{ name: 'Home', url: '/' }];
-  if (parent) breadcrumbs.push({ name: parent.name, url: `/category/${parent.slug}` });
-  breadcrumbs.push({ name: p.category_name, url: `/category/${p.category_slug}` }, { name: p.name, url: `/product/${p.slug}` });
 
-  const inStock = p.stock > 0;
+  if (p.parent_slug) {
+    breadcrumbs.push({
+      name: p.parent_name,
+      url: `/category/${p.parent_slug}`
+    });
+  }
+
+  breadcrumbs.push(
+    {
+      name: p.category_name,
+      url: `/category/${p.category_slug}`
+    },
+    {
+      name: p.name,
+      url: `/product/${p.slug}`
+    }
+  );
+
   res.render('pages/product', {
     seo: {
       rawTitle: p.meta_title || `${p.name} Price in India | ${site.shortName}`,
@@ -339,18 +367,30 @@ const product = wrap(async (req, res) => {
       meta: [
         ['product:price:amount', Number(p.price).toFixed(2)],
         ['product:price:currency', site.currency.code],
-        ['product:availability', inStock ? 'in stock' : 'out of stock'],
+        ['product:availability', p.stock > 0 ? 'in stock' : 'out of stock'],
         ['product:condition', 'new']
       ],
-      jsonLd: [seo.breadcrumbLd(breadcrumbs), seo.productLd(p, { gallery, reviews: detail.reviews })]
+      jsonLd: [
+        seo.breadcrumbLd(breadcrumbs),
+        seo.productLd(p, { gallery, reviews: detail.reviews })
+      ]
     },
+
     product: p,
     gallery,
     specs: detail.specs,
     fitment: detail.vehicles,
     reviews: detail.reviews,
+    breakdown: detail.breakdown,
     related,
     viewed,
+    moreFromBrand,
+
+    eta: {
+      from: dayLabel(3),
+      to: dayLabel(7)
+    },
+
     breadcrumbs
   });
 });

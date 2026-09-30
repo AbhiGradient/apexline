@@ -143,10 +143,12 @@ const findBySlug = async (slug) => {
   const rows = await query(
     `SELECT p.*, b.name AS brand_name, b.slug AS brand_slug,
        c.name AS category_name, c.slug AS category_slug, c.parent_id AS category_parent_id,
+       pc.name AS parent_name, pc.slug AS parent_slug,
        s.store_name, s.slug AS seller_slug
      FROM products p
      JOIN sellers s ON s.id = p.seller_id AND s.status = 'active'
      JOIN categories c ON c.id = p.category_id
+     LEFT JOIN categories pc ON pc.id = c.parent_id
      LEFT JOIN brands b ON b.id = p.brand_id
      WHERE p.slug = ? AND p.status = 'active'
      LIMIT 1`,
@@ -155,8 +157,9 @@ const findBySlug = async (slug) => {
   return rows[0] || null;
 };
 
+
 const details = async (productId) => {
-  const [images, specs, vehicles, reviews] = await Promise.all([
+  const [images, specs, vehicles, reviews, spread] = await Promise.all([
     query('SELECT image, alt FROM product_images WHERE product_id = ? ORDER BY sort_order, id', [productId]),
     query('SELECT spec_key, spec_value FROM product_specs WHERE product_id = ? ORDER BY sort_order, id', [productId]),
     query(
@@ -170,9 +173,19 @@ const details = async (productId) => {
        FROM reviews r JOIN users u ON u.id = r.user_id
        WHERE r.product_id = ? ORDER BY r.created_at DESC LIMIT 10`,
       [productId]
-    )
+    ),
+    query('SELECT rating, COUNT(*) AS n FROM reviews WHERE product_id = ? GROUP BY rating', [productId])
   ]);
-  return { images, specs, vehicles, reviews };
+
+  const counts = Object.fromEntries(spread.map((r) => [r.rating, Number(r.n)]));
+  const total = Object.values(counts).reduce((a, b) => a + b, 0);
+  const breakdown = [5, 4, 3, 2, 1].map((star) => ({
+    star,
+    n: counts[star] || 0,
+    pct: total ? Math.round(((counts[star] || 0) / total) * 100) : 0
+  }));
+
+  return { images, specs, vehicles, reviews, breakdown };
 };
 
 const related = (product, limit = 8) =>
